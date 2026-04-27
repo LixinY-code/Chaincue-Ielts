@@ -397,9 +397,18 @@
     // ========================================
     // Supabase 配置（部署时替换为你的实际值）
     // ========================================
+    let sbClient = null;
     const SUPABASE_URL = 'YOUR_SUPABASE_URL';
     const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-    const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_CONFIGURED = SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY';
+
+    if (SUPABASE_CONFIGURED && window.supabase) {
+        try {
+            sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (e) {
+            console.warn('Supabase 初始化失败:', e);
+        }
+    }
 
     // ========================================
     // 2026年5-8月 Part 2 题库（43道）
@@ -489,18 +498,30 @@
     // 认证系统
     // ========================================
     async function initAuth() {
+        if (!sbClient) {
+            // Supabase 未配置，隐藏登录按钮，允许免登录使用
+            const authBtn = document.getElementById('authBtn');
+            if (authBtn) authBtn.style.display = 'none';
+            currentUser = null;
+            return;
+        }
         sbClient.auth.onAuthStateChange((event, session) => {
             currentUser = session?.user || null;
             updateAuthUI();
         });
-        const { data: { session } } = await sbClient.auth.getSession();
-        currentUser = session?.user || null;
+        try {
+            const { data: { session } } = await sbClient.auth.getSession();
+            currentUser = session?.user || null;
+        } catch (e) {
+            currentUser = null;
+        }
         updateAuthUI();
     }
 
     function updateAuthUI() {
         const authBtn = document.getElementById('authBtn');
         const historyBtn = document.getElementById('historyBtn');
+        if (!authBtn) return;
 
         if (currentUser) {
             const email = currentUser.email || '用户';
@@ -510,11 +531,17 @@
                 e.stopPropagation();
                 document.getElementById('userMenu').classList.toggle('show');
             };
-            historyBtn.classList.remove('hidden');
+            if (historyBtn) historyBtn.classList.remove('hidden');
         } else {
-            authBtn.innerHTML = '登录 / 注册';
-            authBtn.onclick = () => openAuthModal();
-            historyBtn.classList.add('hidden');
+            // 未配置 Supabase 时隐藏按钮，已配置时显示登录
+            if (SUPABASE_CONFIGURED) {
+                authBtn.innerHTML = '登录 / 注册';
+                authBtn.onclick = () => openAuthModal();
+                authBtn.style.display = '';
+            } else {
+                authBtn.style.display = 'none';
+            }
+            if (historyBtn) historyBtn.classList.add('hidden');
             document.getElementById('userMenu').classList.remove('show');
         }
         checkBtn();
@@ -691,7 +718,9 @@
 
     function checkBtn() {
         const exp = document.getElementById('experienceInput').value.trim();
-        document.getElementById('startBtn').disabled = !currentUser || !exp || selected.size === 0;
+        // Supabase 未配置时不需要登录；已配置时必须登录
+        const needAuth = SUPABASE_CONFIGURED && !currentUser;
+        document.getElementById('startBtn').disabled = !exp || selected.size === 0 || needAuth;
     }
 
     // ========================================
@@ -700,8 +729,14 @@
     async function startMatching() {
         const exp = document.getElementById('experienceInput').value.trim();
         if (!exp) { showError('请输入个人经历'); return; }
-        if (!currentUser) { showError('请先登录'); openAuthModal(); return; }
+        if (SUPABASE_CONFIGURED && !currentUser) { showError('请先登录'); openAuthModal(); return; }
         if (selected.size === 0) { showError('请至少选择一个题目'); return; }
+
+        // Supabase 未配置时提示用户需要配置后端
+        if (!SUPABASE_CONFIGURED) {
+            showError('请先配置 Supabase（参考 README.md）或将 index.html 替换为桌面上的单页版使用');
+            return;
+        }
 
         hideAll();
         document.getElementById('loadingSection').classList.remove('hidden');
@@ -791,7 +826,7 @@
 
     async function loadHistoryList() {
         const list = document.getElementById('historyList');
-        list.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">加载中...</p>';
+        if (!sbClient) { list.innerHTML = '<p class="text-xs text-gray-400 text-center py-8">请先配置 Supabase</p>'; return; }
 
         try {
             const { data: { session } } = await sbClient.auth.getSession();
