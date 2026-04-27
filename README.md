@@ -1,133 +1,116 @@
-# 题链扣 — 懂你的雅思串题搭子
+# 🔗 题链扣 · Chaincue
 
-> AI 驱动的雅思口语 Part 2 串题工具，输入真实经历，一键生成多题共享稿。
+> 懂你的雅思口语串题搭子 —— 用你的真实经历，一个故事串起全季题库
 
-## 技术架构
+**题链扣** 是一款专为雅思口语 Part 2 准备的 AI 辅助工具。你只需选择本题库中的若干话题，写下自己的真实经历，AI 就会自动分析、分组，并生成一个 **共用主体段 + 每道题定制开头/结尾** 的完整口语稿。一个核心故事，串起多个题目，极大减轻记忆负担。
 
-```
-用户浏览器 (index.html)
-    ↕ POST /api/generate  (Supabase JWT 鉴权)
-Vercel Serverless Functions (Node.js)
-    ↕ OpenAI-compatible API
-uiuiAPI (gpt-4o-mini)
-    ↕
-Supabase (PostgreSQL + Auth)
-```
+---
 
-## 从零部署步骤
+## ✨ 核心功能
 
-### 1. 创建 Supabase 项目
+- ✅ **真实经历驱动**：不背范文，用你自己的故事作答
+- ✅ **智能分组串题**：AI 自动将你的经历分成 1~3 个故事组，每组串起 2~5 道最贴合的话题
+- ✅ **共享主体 + 定制头尾**：每组生成一个共用主体段 + 每道题的独立开头/强化段/结尾，背得少，考场灵活切换
+- ✅ **全口语化生成**：自然停顿、缩写、填充词，像真人聊天一样
+- ✅ **题库自定义**：支持导入 `.txt` 题库，灵活扩充
+- ✅ **朗读 & 复制**：一键朗读英文稿，一键复制全稿
+- ✅ **历史存档**：自动保存每次生成记录，随时翻看以前的故事
+- ✅ **星星自评**：为每道题稿子难度打分，重点复盘
 
-1. 访问 [supabase.com](https://supabase.com)，注册/登录
-2. 点击 **New Project**，设置项目名称和数据库密码
-3. 选择区域（推荐 Singapore 或 Northeast Asia）
-4. 等待项目创建完成（约 2 分钟）
+---
 
-### 2. 初始化数据库
+## 🚀 在线体验
 
-1. 进入 Supabase Dashboard → **SQL Editor**
-2. 复制 `supabase/migrations/01_init.sql` 的内容
-3. 粘贴到 SQL Editor 并点击 **Run**
-4. 这会创建 `histories` 和 `archives` 两张表 + RLS 策略
+部署完成后访问：  
+👉 [你的 Vercel 域名]
 
-### 3. 获取 Supabase 密钥
+> 你也可以本地 clone 并配置自己的 API Key 运行。
 
-在 Supabase Dashboard → **Settings → API** 中：
+---
 
-- `Project URL` → 这就是 `SUPABASE_URL`
-- `anon public` → 这就是 `SUPABASE_ANON_KEY`（公钥，可以暴露给前端）
-- `service_role` → 这就是 `SUPABASE_SERVICE_ROLE_KEY`（管理员密钥，**绝对不要**给前端）
+## 🛠 技术栈
 
-### 4. 获取 AI API Key
+- **前端**：HTML5 + Tailwind CSS + 原生 JavaScript
+- **后端**：Vercel Serverless Functions (Node.js)
+- **数据库 & 认证**：Supabase (PostgreSQL + Auth)
+- **AI 调用**：uiuiAPI (OpenAI‑兼容，模型 `gpt-4o-mini`)
 
-1. 访问 [sg.uiuiapi.com](https://sg.uiuiapi.com)，注册/登录
-2. 在控制台创建 API Key
-3. 复制 Key，这就是 `UIUI_API_KEY`
+---
 
-### 5. 部署到 Vercel
+## 📦 本地开发 & 部署
 
-**方式一：通过 Git（推荐）**
+### 1. 克隆仓库
 
 ```bash
-# 克隆或复制项目到本地
-cd 题链扣
-
-# 安装依赖
+git clone https://github.com/LixinY-code/Chaincue-Ielts.git
+cd Chaincue-Ielts
 npm install
+2. 配置环境变量
+复制 .env.example 为 .env.local，填入你的密钥：
 
-# 登录 Vercel（首次需要）
-npx vercel login
+env
+UIUI_API_KEY=你的uiuiAPIkey
+SUPABASE_URL=你的Supabase项目URL
+SUPABASE_SERVICE_ROLE_KEY=你的Supabase service_role密钥
+3. 初始化数据库
+在 Supabase SQL Editor 中执行 supabase/migrations/01_init.sql。
 
-# 部署
-npx vercel --prod
-```
+4. 本地运行
+bash
+vercel dev
+访问 http://localhost:3000 即可预览。
 
-部署过程中，Vercel 会提示你设置环境变量：
-- `SUPABASE_URL` = 你的 Supabase Project URL
-- `SUPABASE_SERVICE_ROLE_KEY` = 你的 service_role key
-- `SUPABASE_ANON_KEY` = 你的 anon key
-- `UIUI_API_KEY` = 你的 uiuiAPI key
+5. 部署到 Vercel
+将代码推送到 GitHub 仓库
 
-**方式二：通过 Vercel Dashboard**
+登录 Vercel，导入该仓库
 
-1. 访问 [vercel.com](https://vercel.com)，登录
-2. 点击 **New Project** → **Import Git Repository** 或上传文件夹
-3. 在 **Environment Variables** 中添加上述 4 个环境变量
-4. 点击 **Deploy**
+在环境变量页面添加上述三个变量
 
-### 6. 配置前端 Supabase 连接
+点击 Deploy，等待完成
 
-打开 `index.html`，找到文件顶部 `<script>` 中的两行配置：
+📥 导入自定义题库
+支持导入 .txt 文本文件，每行格式为：
 
-```javascript
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-```
+text
+中文题目名 / 英文题目描述
+例如：
 
-替换为你在 Supabase Dashboard 中获取的实际值。
+text
+迷路 / Describe an occasion when you lost your way
+点击题库区域的“📥 导入题库”按钮，选择文件即可追加（自动去重）。
 
-> ⚠️ `SUPABASE_ANON_KEY` 是公钥，暴露在前端是安全的（有 RLS 保护）。
-> `SUPABASE_SERVICE_ROLE_KEY` 是管理员密钥，**只放在 Vercel 环境变量中**。
+🎯 使用流程
+登录：邮箱注册/登录
 
-### 7. 本地开发
+勾选题目：选择你想串的 Part 2 话题
 
-```bash
-# 安装依赖
-npm install
+输入经历：写下真实发生的故事（越具体越好）
 
-# 创建 .env.local 文件，填入 4 个环境变量
-cp .env.example .env.local
+点击「开始串题」：AI 后台自动分组并生成脚本
 
-# 启动开发服务器
-npx vercel dev
-```
+学习脚本：
 
-访问 `http://localhost:3000` 即可。
+先背 共享主体段（所有题目共用）
 
-## 文件结构
+再背每道题的 开头 + 强化段 + 结尾
 
-```
-题链扣/
-├── index.html                     # 前端单页应用
-├── api/
-│   ├── generate.js                # AI 两阶段串题（核心）
-│   ├── histories.js                # 获取历史记录列表
-│   ├── history/
-│   │   └── [id].js                 # 获取单条历史详情
-│   └── save-archive.js             # 收藏/取消收藏
-├── supabase/
-│   └── migrations/
-│       └── 01_init.sql             # 数据库建表
-├── package.json
-├── vercel.json
-├── .env.example
-└── README.md
-```
+针对不同题目切换开头/结尾即可
 
-## 安全说明
+收藏与回顾：点击“收藏”按钮保存优质稿子，到“我的存档”复习
 
-- ✅ 所有 AI Prompt 仅存在于后端 `api/generate.js`，前端不包含任何 Prompt
-- ✅ AI API Key (`UIUI_API_KEY`) 仅存储在 Vercel 环境变量中，前端无法访问
-- ✅ 后端每个 API 都验证 Supabase JWT Token，确保用户只能访问自己的数据
-- ✅ 数据库表启用 Row Level Security (RLS)
-- ✅ `SUPABASE_SERVICE_ROLE_KEY` 仅在后端使用，不暴露给前端
+📄 许可证
+本项目仅供个人学习、备考使用。禁止任何形式的二次销售或嵌入商业平台。
+如需商业合作，请联系作者。
+
+🙋 反馈与支持
+提交 Issue：GitHub Issues
+
+联系作者：你的邮箱 / 微信 / 公众号
+
+💡 致谢
+灵感来源于雅思备考中“串题”的真实痛点
+
+题库参考 2026 年 5-8 月雅思口语 Part 2 高频话题
+
+用你的故事，说你的答案。—— 题链扣
