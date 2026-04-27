@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>题链扣 — 懂你的雅思串题搭子</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        * { font-family: 'Inter', 'Noto Sans SC', sans-serif; }
+
+        /* 背景 */
+        body {
+            background: #f8f7ff;
+            background-image:
+                radial-gradient(ellipse at 20% 10%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 90%, rgba(236, 72, 153, 0.06) 0%, transparent 50%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image:
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23a78bfa' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .deco-orb { position: fixed; border-radius: 50%; filter: blur(60px); pointer-events: none; z-index: 0; opacity: 0.4; }
+        .deco-orb-1 { width: 300px; height: 300px; background: rgba(139, 92, 246, 0.12); top: -80px; right: -100px; animation: floatOrb 12s ease-in-out infinite; }
+        .deco-orb-2 { width: 200px; height: 200px; background: rgba(236, 72, 153, 0.1); bottom: 10%; left: -60px; animation: floatOrb 15s ease-in-out infinite reverse; }
+        @keyframes floatOrb { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(20px, -20px) scale(1.08); } }
+
+        .brand-title { background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+        .card { background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(139, 92, 246, 0.1); box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03); transition: box-shadow 0.3s ease, transform 0.3s ease; }
+        .card:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.06), 0 8px 24px rgba(124, 58, 237, 0.08); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.2); border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.4); }
+
+        .input-field { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1.5px solid #e5e7eb; background: rgba(255,255,255,0.9); }
+        .input-field:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12), 0 4px 20px rgba(139, 92, 246, 0.08); background: #fff; }
+
+        .btn-main { background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); box-shadow: 0 4px 15px rgba(124, 58, 237, 0.35); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-main:hover:not(:disabled) { box-shadow: 0 6px 25px rgba(124, 58, 237, 0.5); transform: translateY(-1px); }
+        .btn-main:active:not(:disabled) { transform: translateY(0px) scale(0.98); }
+        .btn-main:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+        .btn-secondary { background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.2); color: #7c3aed; transition: all 0.2s ease; }
+        .btn-secondary:hover { background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.35); }
+
+        .btn-action { transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .btn-action:hover { transform: translateY(-1px) scale(1.03); }
+        .btn-action:active { transform: scale(0.97); }
+
+        .loading-dots::after { content: ''; animation: dots 1.5s steps(4, end) infinite; }
+        @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
+
+        .loading-bar { height: 3px; background: linear-gradient(90deg, #a78bfa, #ec4899, #f59e0b); background-size: 200% 100%; animation: shimmer 1.8s linear infinite; border-radius: 99px; }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+        .fade-up { animation: fadeUp 0.5s ease-out forwards; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        .topic-tag { transition: all 0.15s ease; cursor: pointer; user-select: none; }
+        .topic-tag:hover { background: #f3f0ff; border-color: #a78bfa; }
+        .topic-tag.active { background: #ede9fe; border-color: #7c3aed; }
+
+        .topic-check { width: 16px; height: 16px; accent-color: #7c3aed; cursor: pointer; }
+
+        .story-card { transition: all 0.3s ease; border-left: 3px solid #a78bfa; }
+        .story-card:hover { box-shadow: 0 8px 30px rgba(124, 58, 237, 0.12); }
+
+        .script-body { border-left: 3px solid #ddd6fe; padding-left: 14px; }
+
+        .stat-done { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .stat-miss { background: #fef9c3; color: #854d0e; border: 1px solid #fde68a; }
+
+        .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); padding: 10px 22px; border-radius: 12px; color: #fff; font-size: 14px; font-weight: 500; z-index: 9999; box-shadow: 0 8px 30px rgba(0,0,0,0.2); pointer-events: none; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast-success { background: #059669; border-left: 4px solid #34d399; }
+        .toast-error { background: #dc2626; border-left: 4px solid #f87171; }
+        .toast-info { background: #4b5563; border-left: 4px solid #9ca3af; }
+
+        .dropdown-content { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .dropdown-content.open { max-height: 3000px; }
+
+        .tip-card { background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); border-left: 3px solid #f59e0b; }
+
+        .encourage-hint { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px dashed #93c5fd; border-radius: 10px; }
+
+        .mood-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1.5px solid transparent; background-clip: padding-box; position: relative; }
+        .mood-card::before { content: ''; position: absolute; inset: -1.5px; border-radius: inherit; background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(236,72,153,0.3), rgba(251,191,36,0.2)); z-index: -1; border-radius: 16px; }
+
+        .template-btn { background: rgba(139, 92, 246, 0.06); border: 1px solid rgba(139, 92, 246, 0.15); color: #6d28d9; transition: all 0.2s ease; cursor: pointer; }
+        .template-btn:hover { background: rgba(139, 92, 246, 0.14); border-color: rgba(139, 92, 246, 0.35); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15); }
+
+        .speak-btn { transition: all 0.2s ease; }
+        .speak-btn:hover { transform: scale(1.1); }
+        .speak-btn.speaking { animation: pulse-speak 1s ease-in-out infinite; }
+        @keyframes pulse-speak { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+        .star-rating .star { cursor: pointer; font-size: 16px; transition: transform 0.15s ease, color 0.15s ease; color: #d1d5db; }
+        .star-rating .star:hover { transform: scale(1.25); }
+        .star-rating .star.active { color: #f59e0b; }
+
+        .step-item { display: flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 99px; font-size: 12px; color: #9ca3af; transition: all 0.3s ease; }
+        .step-item.active { color: #7c3aed; background: rgba(124, 58, 237, 0.08); font-weight: 600; }
+        .step-item.done { color: #059669; }
+        .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #e5e7eb; transition: background 0.3s ease; }
+        .step-item.active .step-dot { background: #7c3aed; box-shadow: 0 0 8px rgba(124, 58, 237, 0.4); }
+        .step-item.done .step-dot { background: #059669; }
+
+        /* ===== 新增：登录弹窗 ===== */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: 20px; padding: 2rem; width: 380px; max-width: 92vw; box-shadow: 0 20px 60px rgba(0,0,0,0.15); border: 1px solid rgba(139,92,246,0.15); }
+        .auth-tab { padding: 6px 16px; border-radius: 99px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; color: #6b7280; }
+        .auth-tab.active { background: #7c3aed; color: #fff; box-shadow: 0 2px 8px rgba(124,58,237,0.3); }
+
+        /* ===== 新增：历史侧边栏 ===== */
+        .history-sidebar { position: fixed; top: 0; right: 0; bottom: 0; width: 360px; max-width: 90vw; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); z-index: 90; transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); box-shadow: -4px 0 30px rgba(0,0,0,0.1); border-left: 1px solid rgba(139,92,246,0.1); }
+        .history-sidebar.open { transform: translateX(0); }
+        .history-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.2); z-index: 89; display: none; }
+        .history-backdrop.show { display: block; }
+
+        /* 用户下拉菜单 */
+        .user-menu { position: absolute; top: 100%; right: 0; margin-top: 6px; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(139,92,246,0.12); border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); min-width: 160px; overflow: hidden; display: none; z-index: 50; }
+        .user-menu.show { display: block; }
+        .user-menu-item { padding: 10px 16px; font-size: 13px; color: #374151; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 8px; }
+        .user-menu-item:hover { background: #f3f0ff; }
+    </style>
+</head>
+
+<body>
+    <div class="deco-orb deco-orb-1"></div>
+    <div class="deco-orb deco-orb-2"></div>
+
+    <div class="min-h-screen relative" style="z-index:1;">
+
+        <!-- 顶部品牌区 -->
+        <div class="pt-8 pb-4 text-center relative">
+            <div class="inline-flex items-center gap-2.5 mb-2">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-lg shadow-lg shadow-violet-200">
+                    🔗
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold brand-title tracking-tight">
+                    题链扣
+                </h1>
+            </div>
+            <p class="text-gray-500 text-sm md:text-base font-medium">
+                懂你的雅思串题搭子 &nbsp;·&nbsp; 用真实经历，一稿串多题
+            </p>
+
+            <!-- 用户操作区（右上角） -->
+            <div class="absolute top-6 right-4 md:right-8 flex items-center gap-2">
+                <button id="historyBtn" onclick="toggleHistorySidebar()" class="btn-secondary px-3 py-1.5 rounded-xl text-xs font-medium btn-action hidden" title="历史记录">
+                    📋 历史
+                </button>
+                <div class="relative">
+                    <button id="authBtn" onclick="handleAuthBtnClick()" class="btn-secondary px-3.5 py-1.5 rounded-xl text-xs font-medium btn-action">
+                        登录 / 注册
+                    </button>
+                    <div id="userMenu" class="user-menu">
+                        <div class="user-menu-item" onclick="toggleHistorySidebar()">
+                            <span>📋</span> 历史记录
+                        </div>
+                        <div class="user-menu-item" onclick="handleLogout()">
+                            <span>🚪</span> 退出登录
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 pb-12 max-w-4xl">
+
+            <!-- 氛围卡片 -->
+            <div class="flex justify-end mb-4">
+                <div id="moodCard" class="mood-card rounded-2xl px-5 py-3.5 max-w-xs text-right shadow-sm">
+                    <p class="text-xs font-semibold text-violet-700 mb-0.5">🎯 今日挑战</p>
+                    <p id="moodText" class="text-xs text-gray-600 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <!-- 题库选择 -->
+            <section class="card rounded-2xl p-5 mb-5 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
+                            <span class="text-sm">📚</span>
+                        </div>
+                        <h2 class="text-sm font-semibold text-gray-700">选择串题范围</h2>
+                        <span class="text-xs text-gray-400">（勾选你想参与的题目）</span>
+                    </div>
+                    <div class="flex gap-1.5">
+                        <button onclick="selectAll()" class="btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium btn-action">全选</button>
+                        <button onclick="deselectAll()" class="btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium btn-action">清空</button>
+                        <button onclick="document.getElementById('txtFileInput').click()" class="btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium btn-action">📥 导入题库</button>
+                        <input type="file" id="txtFileInput" accept=".txt" class="hidden" onchange="importTopics(event)">
+                    </div>
+                </div>
+
+                <div id="importHint" class="hidden tip-card rounded-xl p-3 mb-2 mt-1">
+                    <p class="text-xs font-semibold text-amber-800 mb-1">📋 导入格式说明</p>
+                    <p class="text-xs text-amber-700 leading-relaxed">
+                        每行一道题，格式：<code class="bg-white/70 px-1 rounded">中文名 / 英文完整题目</code><br>
+                        示例：<code class="bg-white/70 px-1 rounded">迷路 / Describe an occasion when you lost your way</code><br>
+                        也可用逗号、竖线 | 分隔。导入后会追加到当前题库（去重）。
+                    </p>
+                </div>
+
+                <div class="flex items-center justify-between mb-3">
+                    <p class="text-xs text-gray-500">
+                        共 <strong id="totalCount" class="text-violet-600">43</strong> 道题，已选 <strong id="selectedCount" class="text-violet-600">0</strong> 道
+                    </p>
+                    <div class="w-32 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div id="selectionBar" class="h-full bg-gradient-to-r from-violet-500 to-pink-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="topicGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 max-h-52 overflow-y-auto pr-1"></div>
+            </section>
+
+            <!-- 经历输入 -->
+            <section class="card rounded-2xl p-6 mb-5 shadow-sm">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
+                        <span class="text-sm">✍️</span>
+                    </div>
+                    <h2 class="text-sm font-semibold text-gray-700">输入你的真实经历</h2>
+                </div>
+
+                <div class="tip-card rounded-xl p-4 mb-4">
+                    <p class="text-xs font-semibold text-amber-800 mb-2">💡 事件要素提示（越完整，串题越准）</p>
+                    <div class="flex flex-wrap gap-1 mb-3">
+                        <span class="text-xs px-2 py-1 bg-white/70 rounded-full text-amber-700">👤 who 谁</span>
+                        <span class="text-xs px-2 py-1 bg-white/70 rounded-full text-amber-700">🎯 what 做了什么</span>
+                        <span class="text-xs px-2 py-1 bg-white/70 rounded-full text-amber-700">📅 when 何时</span>
+                        <span class="text-xs px-2 py-1 bg-white/70 rounded-full text-amber-700">📍 where 在哪</span>
+                        <span class="text-xs px-2 py-1 bg-white/70 rounded-full text-amber-700">😄 how 感受如何</span>
+                    </div>
+                    <p class="text-xs font-medium text-amber-700 mb-1.5">🌟 口语化开头句式（可直接参考）</p>
+                    <div class="text-xs text-amber-700 space-y-0.5 font-mono">
+                        <p>• <strong>To be honest, the first one that popped up is...</strong> / 老实说，第一个想到的是...</p>
+                        <p>• <strong>I'd like to talk about... / Honestly, this brings me to...</strong> / 我想说... / 这让我想到...</p>
+                        <p>• <strong>I remember once when... / What I really want to share is...</strong> / 我记得有次... / 我真正想分享的是...</p>
+                        <p>• <strong>Instead of..., she decided to... / She is the kind of person who...</strong> / 她没有...而是... / 她是那种...</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 mb-3 flex-wrap">
+                    <span class="text-xs text-gray-400">✨ 没灵感？试试：</span>
+                    <button onclick="fillTemplate(0)" class="template-btn text-xs px-3 py-1.5 rounded-full">🏔️ 和朋友爬山迷路</button>
+                    <button onclick="fillTemplate(1)" class="template-btn text-xs px-3 py-1.5 rounded-full">☕ 咖啡店打工趣事</button>
+                    <button onclick="fillTemplate(2)" class="template-btn text-xs px-3 py-1.5 rounded-full">🎨 小时候学画画受挫</button>
+                </div>
+
+                <textarea id="experienceInput"
+                    placeholder="在这里写下你的经历，哪怕只是一句话也可以！😊&#10;&#10;💡 写你真实记得的细节就好，AI 会帮你自然地串联多个题目"
+                    class="input-field w-full h-36 p-4 rounded-xl resize-none text-sm text-gray-700 leading-relaxed"></textarea>
+
+                <div class="flex items-center justify-between mt-3">
+                    <span id="charCount" class="text-xs text-gray-400">0 字符</span>
+                    <div class="flex gap-2">
+                        <button onclick="clearInput()" class="btn-secondary px-4 py-2.5 rounded-xl text-sm btn-action">
+                            重置
+                        </button>
+                        <button id="startBtn" onclick="startMatching()" disabled
+                            class="btn-main px-6 py-3 rounded-xl text-sm font-semibold text-white btn-action">
+                            ✨ 开始串题
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 加载中 -->
+            <section id="loadingSection" class="hidden card rounded-2xl p-8 mb-5 text-center">
+                <div class="inline-block animate-spin rounded-full h-10 w-10 border-[3px] border-violet-100 border-t-violet-600 mb-4"></div>
+                <p id="loadingTitle" class="text-base font-medium text-gray-700">
+                    AI 正在分析经历<span class="loading-dots"></span>
+                </p>
+                <p id="loadingSub" class="text-xs text-gray-400 mt-1 mb-4">准备分组...</p>
+                <div class="w-full max-w-xs mx-auto loading-bar mb-5"></div>
+                <div class="flex justify-center gap-3 flex-wrap">
+                    <div id="step1" class="step-item active">
+                        <span class="step-dot"></span>
+                        <span>⏳ 分析关键词</span>
+                    </div>
+                    <div class="text-gray-300 text-xs self-center">→</div>
+                    <div id="step2" class="step-item">
+                        <span class="step-dot"></span>
+                        <span>🔗 匹配分组</span>
+                    </div>
+                    <div class="text-gray-300 text-xs self-center">→</div>
+                    <div id="step3" class="step-item">
+                        <span class="step-dot"></span>
+                        <span>✍️ 编写口语稿</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 题目过多友好提示 -->
+            <section id="topicWarning" class="hidden mb-5">
+                <div class="encourage-hint p-4">
+                    <p class="text-xs text-blue-700 leading-relaxed">
+                        💡 选了 <strong id="warningCount">0</strong> 道题，数量较多。建议在下方输入框补充 <strong>1~2 段不同侧重的经历</strong>，这样串题效果更好、覆盖更广。
+                    </p>
+                </div>
+            </section>
+
+            <!-- 错误提示 -->
+            <section id="errorSection" class="hidden card rounded-2xl p-6 mb-5 shadow-sm bg-red-50/80 border border-red-100">
+                <div class="flex items-start gap-3">
+                    <span class="text-2xl">❌</span>
+                    <div>
+                        <h3 class="font-semibold text-red-700 text-sm">出错了</h3>
+                        <p id="errorMessage" class="text-red-600 text-xs mt-1"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 串题总览 -->
+            <section id="overviewSection" class="hidden card rounded-2xl p-5 mb-5 shadow-sm fade-up">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
+                        <span class="text-sm">📊</span>
+                    </div>
+                    <h2 class="text-sm font-semibold text-gray-700">本次串题总览</h2>
+                </div>
+                <div id="overviewContent"></div>
+            </section>
+
+            <!-- 事例分组 -->
+            <section id="resultsSection" class="hidden">
+                <div id="resultsList" class="space-y-4"></div>
+            </section>
+
+            <footer class="mt-8 text-center">
+                <p class="text-xs text-gray-400">
+                    ⚠️ AI 辅助串题 · 口语高分 = 真实感 + 流利度 + 眼神交流 · 请务必加入自己的真实感受
+                </p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- ===== 登录/注册弹窗 ===== -->
+    <div id="authModal" class="modal-overlay" onclick="if(event.target===this)closeAuthModal()">
+        <div class="modal-box">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-base font-semibold text-gray-800">欢迎来到题链扣</h3>
+                <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+            </div>
+            <div class="flex gap-2 mb-5 bg-gray-100 rounded-full p-1">
+                <div class="auth-tab active" data-tab="login" onclick="switchAuthTab('login')">登录</div>
+                <div class="auth-tab" data-tab="register" onclick="switchAuthTab('register')">注册</div>
+            </div>
+            <div id="authError" class="hidden text-xs text-red-600 mb-3 p-2 bg-red-50 rounded-lg"></div>
+            <div class="space-y-3">
+                <input id="authEmail" type="email" placeholder="邮箱地址"
+                    class="input-field w-full px-4 py-2.5 rounded-xl text-sm">
+                <input id="authPassword" type="password" placeholder="密码"
+                    class="input-field w-full px-4 py-2.5 rounded-xl text-sm">
+                <button id="authSubmitBtn" onclick="handleAuthSubmit()" class="btn-main w-full py-2.5 rounded-xl text-sm font-semibold text-white">
+                    登录
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 历史记录侧边栏 ===== -->
+    <div id="historyBackdrop" class="history-backdrop" onclick="toggleHistorySidebar()"></div>
+    <div id="historySidebar" class="history-sidebar">
+        <div class="p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-gray-800">📋 历史记录</h3>
+                <button onclick="toggleHistorySidebar()" class="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+            </div>
+            <div id="historyList" class="space-y-2 max-h-[calc(100vh-100px)] overflow-y-auto pr-1">
+                <p class="text-xs text-gray-400 text-center py-8">暂无记录</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ========================================
+    // Supabase 配置（部署时替换为你的实际值）
+    // ========================================
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ========================================
+    // 2026年5-8月 Part 2 题库（43道）
+    // ========================================
+    let TOPICS = [
+        { cn: "完美工作", en: "Describe your perfect job" },
+        { cn: "想见的名人", en: "Describe a famous person you would like to meet" },
+        { cn: "禁用手机的场合", en: "Describe an occasion when you were not allowed to use your mobile phone" },
+        { cn: "给别人建议", en: "Describe a time when you gave advice to others" },
+        { cn: "外国短期停留", en: "Describe a foreign country you would like to stay or work for a short period" },
+        { cn: "想拥有的科技产品", en: "Describe a piece of technology (not a phone) that you would like to own" },
+        { cn: "常做计划的人", en: "Describe a person who makes plans a lot" },
+        { cn: "喜欢画画的朋友", en: "Describe a friend of yours who loves drawing/painting" },
+        { cn: "App/程序", en: "Describe a program or app on your computer or phone" },
+        { cn: "最近读过的故事", en: "Describe a story you have read recently" },
+        { cn: "微笑的场合", en: "Describe an occasion when many people were smiling" },
+        { cn: "为家人骄傲", en: "Describe a time when you felt proud of a family member" },
+        { cn: "对家庭重要的东西", en: "Describe something important that has been kept in your family for a long time" },
+        { cn: "商城", en: "Describe a shopping mall you know well" },
+        { cn: "想了解的野生动物", en: "Describe a wild animal that you want to learn more about" },
+        { cn: "擅长音乐的朋友", en: "Describe a friend of yours who is good at music/singing" },
+        { cn: "重要的好朋友", en: "Describe a good friend who is important to you" },
+        { cn: "迷路", en: "Describe an occasion when you lost your way" },
+        { cn: "家族企业工作的人", en: "Describe a person you know who enjoys working for a family business" },
+        { cn: "想提升的天赋", en: "Describe a natural talent (sports, music, etc.) you want to improve" },
+        { cn: "和亲友享受的晚餐", en: "Describe a great dinner you enjoyed with friends or family" },
+        { cn: "想再去一次的远行", en: "Describe a long journey you had and would like to take again" },
+        { cn: "传统故事", en: "Describe an interesting traditional story" },
+        { cn: "突然停电", en: "Describe a time when the electricity suddenly went off" },
+        { cn: "别人向你道歉", en: "Describe a time when someone apologized to you" },
+        { cn: "学习朋友好习惯", en: "Describe a good habit your friend has and you want to develop" },
+        { cn: "第一次尝试的兴奋活动", en: "Describe an exciting activity you have tried for the first time" },
+        { cn: "钦佩的有创造力的人", en: "Describe a creative person (artist, musician, architect, etc.) you admire" },
+        { cn: "家中重要老物件", en: "Describe an important old thing that your family has kept" },
+        { cn: "第一次用外语", en: "Describe the time when you first talked in a foreign language" },
+        { cn: "社交媒体趣事", en: "Describe a time you saw something interesting on social media" },
+        { cn: "弄坏东西", en: "Describe a time when you broke something" },
+        { cn: "感兴趣的科学学科", en: "Describe an area/subject of science that you are interested in" },
+        { cn: "有用的书", en: "Describe a book you read that you found useful" },
+        { cn: "钦佩的运动员", en: "Describe a successful sportsperson you admire" },
+        { cn: "童年喜欢的玩具", en: "Describe a toy you liked in your childhood" },
+        { cn: "别人帮忙下做的决定", en: "Describe an important decision made with the help of others" },
+        { cn: "等待特别事情", en: "Describe a time when you waited for something special" },
+        { cn: "购物服务", en: "Describe a time when you received good service in a shop" },
+        { cn: "自然之地", en: "Describe a natural place (parks, mountains, etc.)" },
+        { cn: "让你失望的电影", en: "Describe a movie you watched that you felt disappointed about" },
+        { cn: "生活中离不开的东西", en: "Describe something that you can't live without (not a computer/phone)" },
+        { cn: "家里放松的地方", en: "Describe your favorite place in your house where you can relax" }
+    ];
+
+    let selected = new Set();
+    let results = [];
+    let starRatings = {};
+    let currentUtterance = null;
+    let currentUser = null;
+    let authMode = 'login'; // 'login' | 'register'
+    let lastHistoryId = null;
+
+    const TEMPLATES = [
+        '上个月我和三个朋友去爬白云山，结果走错了一条小路，在山上迷路了快一个小时。最后遇到一个当地的大叔带我们下了山，下山后我们在山脚的小吃店吃了一顿特别满足的饭，大家聊了很多以前的事情。',
+        '去年暑假我在学校旁边的一家咖啡店打工了两个月。遇到了各种各样有意思的客人，有一个老爷爷每周三下午都来点同一杯美式，坐在角落里画画。后来我鼓起勇气和他聊天，发现他居然是退休的美术教授，他教了我很多关于色彩和构图的知识。',
+        '我小时候特别想学画画，我妈给我报了一个周末班。但是第一次上课的时候，老师让我画一只猫，我画得很丑，旁边的小朋友都笑我。我当时特别受挫，甚至想放弃。但是老师走过来跟我说："每个画家都是从这里开始的。"后来我真的坚持学了好几年，还参加了学校的画展。'
+    ];
+
+    const ENCOURAGEMENTS = [
+        '每天串 3 题，Part 2 不再慌 🌟',
+        '口语的核心是"像在聊天"——你已经赢了一半 💪',
+        '真实经历 > 编造故事，考官听得出来的 👂',
+        '串题不是偷懒，是聪明地分配精力 🧠',
+        '今天多串一题，考场上多一分从容 ✨',
+        'Part 2 只要 2 分钟，你的故事值得被听到 🎤',
+        '流利 > 高级词汇，自信 > 完美语法 🏆',
+        '串完记得出声读 3 遍，肌肉记忆很重要 🗣️'
+    ];
+
+    // ========================================
+    // 初始化
+    // ========================================
+    document.addEventListener('DOMContentLoaded', () => {
+        initAuth();
+        renderTopics();
+        initMoodCard();
+        document.getElementById('experienceInput').addEventListener('input', onInputChange);
+    });
+
+    // ========================================
+    // 认证系统
+    // ========================================
+    async function initAuth() {
+        sbClient.auth.onAuthStateChange((event, session) => {
+            currentUser = session?.user || null;
+            updateAuthUI();
+        });
+        const { data: { session } } = await sbClient.auth.getSession();
+        currentUser = session?.user || null;
+        updateAuthUI();
+    }
+
+    function updateAuthUI() {
+        const authBtn = document.getElementById('authBtn');
+        const historyBtn = document.getElementById('historyBtn');
+
+        if (currentUser) {
+            const email = currentUser.email || '用户';
+            const avatar = email.charAt(0).toUpperCase();
+            authBtn.innerHTML = `<span class="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 text-white text-xs flex items-center justify-center font-semibold">${avatar}</span>`;
+            authBtn.onclick = (e) => {
+                e.stopPropagation();
+                document.getElementById('userMenu').classList.toggle('show');
+            };
+            historyBtn.classList.remove('hidden');
+        } else {
+            authBtn.innerHTML = '登录 / 注册';
+            authBtn.onclick = () => openAuthModal();
+            historyBtn.classList.add('hidden');
+            document.getElementById('userMenu').classList.remove('show');
+        }
+        checkBtn();
+    }
+
+    function handleAuthBtnClick() {
+        openAuthModal();
+    }
+
+    function openAuthModal() {
+        document.getElementById('authModal').classList.add('show');
+        document.getElementById('authEmail').value = '';
+        document.getElementById('authPassword').value = '';
+        document.getElementById('authError').classList.add('hidden');
+        switchAuthTab('login');
+    }
+
+    function closeAuthModal() {
+        document.getElementById('authModal').classList.remove('show');
+    }
+
+    function switchAuthTab(mode) {
+        authMode = mode;
+        document.querySelectorAll('.auth-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.tab === mode);
+        });
+        document.getElementById('authSubmitBtn').textContent = mode === 'login' ? '登录' : '注册';
+    }
+
+    async function handleAuthSubmit() {
+        const email = document.getElementById('authEmail').value.trim();
+        const password = document.getElementById('authPassword').value;
+        const errEl = document.getElementById('authError');
+
+        if (!email || !password) {
+            errEl.textContent = '请填写邮箱和密码';
+            errEl.classList.remove('hidden');
+            return;
+        }
+
+        const btn = document.getElementById('authSubmitBtn');
+        btn.disabled = true;
+        btn.textContent = '处理中...';
+        errEl.classList.add('hidden');
+
+        try {
+            const { error } = authMode === 'login'
+                ? await sbClient.auth.signInWithPassword({ email, password })
+                : await sbClient.auth.signUp({ email, password });
+
+            if (error) throw error;
+            closeAuthModal();
+            showToast(authMode === 'login' ? '登录成功 ✓' : '注册成功 ✓', 'success');
+        } catch (err) {
+            errEl.textContent = err.message || '操作失败';
+            errEl.classList.remove('hidden');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = authMode === 'login' ? '登录' : '注册';
+        }
+    }
+
+    async function handleLogout() {
+        document.getElementById('userMenu').classList.remove('show');
+        await sbClient.auth.signOut();
+        showToast('已退出登录', 'info');
+    }
+
+    // 点击其他区域关闭菜单
+    document.addEventListener('click', (e) => {
+        const menu = document.getElementById('userMenu');
+        if (!e.target.closest('#userMenu') && !e.target.closest('#authBtn')) {
+            menu.classList.remove('show');
+        }
+    });
+
+    // ========================================
+    // 题目网格
+    // ========================================
+    function renderTopics() {
+        const grid = document.getElementById('topicGrid');
+        grid.innerHTML = TOPICS.map((t, i) => `
+            <label class="topic-tag flex items-start gap-1.5 p-2 rounded-xl border border-gray-200 select-none" data-i="${i}">
+                <input type="checkbox" class="topic-check mt-0.5 flex-shrink-0" value="${i}" checked onchange="toggleTopic(${i})">
+                <div class="min-w-0">
+                    <div class="text-xs font-medium text-gray-700 leading-snug">${t.cn}</div>
+                    <div class="text-xs text-gray-400 leading-snug truncate">${t.en}</div>
+                </div>
+            </label>
+        `).join('');
+        selected = new Set(TOPICS.map((_, i) => i));
+        updateCount();
+    }
+
+    function selectAll() {
+        selected = new Set(TOPICS.map((_, i) => i));
+        document.querySelectorAll('.topic-check').forEach(c => c.checked = true);
+        document.querySelectorAll('.topic-tag').forEach(l => l.classList.add('active'));
+        updateCount();
+    }
+
+    function deselectAll() {
+        selected.clear();
+        document.querySelectorAll('.topic-check').forEach(c => c.checked = false);
+        document.querySelectorAll('.topic-tag').forEach(l => l.classList.remove('active'));
+        updateCount();
+    }
+
+    function toggleTopic(i) {
+        const cb = document.querySelector(`.topic-check[value="${i}"]`);
+        const label = document.querySelector(`.topic-tag[data-i="${i}"]`);
+        if (cb.checked) { selected.add(i); label.classList.add('active'); }
+        else { selected.delete(i); label.classList.remove('active'); }
+        updateCount();
+    }
+
+    function updateCount() {
+        const total = TOPICS.length;
+        const sel = selected.size;
+        document.getElementById('selectedCount').textContent = sel;
+        document.getElementById('totalCount').textContent = total;
+        document.getElementById('selectionBar').style.width = total > 0 ? (sel / total * 100) + '%' : '0%';
+        const warning = document.getElementById('topicWarning');
+        if (sel > 12) { document.getElementById('warningCount').textContent = sel; warning.classList.remove('hidden'); }
+        else { warning.classList.add('hidden'); }
+        checkBtn();
+    }
+
+    function onInputChange() {
+        document.getElementById('charCount').textContent = document.getElementById('experienceInput').value.length + ' 字符';
+        checkBtn();
+    }
+
+    function clearInput() {
+        document.getElementById('experienceInput').value = '';
+        onInputChange();
+    }
+
+    // ========================================
+    // 导入题库
+    // ========================================
+    function importTopics(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            const newTopics = [];
+            for (const line of lines) {
+                let parts = null;
+                for (const sep of ['/', '|', ',', '，']) {
+                    const idx = line.indexOf(sep);
+                    if (idx !== -1) {
+                        const cn = line.substring(0, idx).trim();
+                        const en = line.substring(idx + 1).trim();
+                        if (cn && en) { parts = { cn, en }; break; }
+                    }
+                }
+                if (parts) newTopics.push(parts);
+            }
+            if (newTopics.length === 0) { showToast('未能解析到题目，请检查文件格式', 'error'); return; }
+            const existingCn = new Set(TOPICS.map(t => t.cn));
+            let added = 0;
+            newTopics.forEach(t => { if (!existingCn.has(t.cn)) { TOPICS.push(t); existingCn.add(t.cn); added++; } });
+            renderTopics();
+            document.getElementById('importHint').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('importHint').classList.add('hidden'); }, 5000);
+            showToast(`成功追加 ${added} 道题${newTopics.length - added > 0 ? '，跳过 ' + (newTopics.length - added) + ' 道重复题' : ''} ✓`, 'success');
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    function checkBtn() {
+        const exp = document.getElementById('experienceInput').value.trim();
+        document.getElementById('startBtn').disabled = !currentUser || !exp || selected.size === 0;
+    }
+
+    // ========================================
+    // 核心：调用后端两阶段串题
+    // ========================================
+    async function startMatching() {
+        const exp = document.getElementById('experienceInput').value.trim();
+        if (!exp) { showError('请输入个人经历'); return; }
+        if (!currentUser) { showError('请先登录'); openAuthModal(); return; }
+        if (selected.size === 0) { showError('请至少选择一个题目'); return; }
+
+        hideAll();
+        document.getElementById('loadingSection').classList.remove('hidden');
+        document.getElementById('startBtn').disabled = true;
+        setStep(1);
+        updateLoading('🧠 AI 正在分析经历...', `共 ${selected.size} 道题`);
+
+        try {
+            const { data: { session } } = await sbClient.auth.getSession();
+            const token = session?.access_token;
+            if (!token) { showError('登录已过期，请重新登录'); return; }
+
+            const selectedTopics = Array.from(selected).map(i => TOPICS[i]);
+
+            setStep(2);
+            updateLoading('🔗 正在匹配分组并生成脚本...', `共 ${selectedTopics.length} 道题`);
+
+            const res = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ experience: exp, topics: selectedTopics })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || `服务器错误 (${res.status})`);
+            }
+
+            if (!data.success || !data.groups || data.groups.length === 0) {
+                throw new Error('AI 未能生成结果，请尝试补充更多经历细节');
+            }
+
+            results = data.groups;
+            lastHistoryId = null; // 由后端自动保存
+
+            // 构建总览
+            const covered = new Set();
+            const missed = new Set(selected);
+            results.forEach(g => {
+                g.topics.forEach(t => {
+                    const isChained = t.shared_body && t.shared_body.length > 50;
+                    const hasFallback = t.script && !t.script.startsWith('[生成失败]') && t.script.length > 50;
+                    if (isChained || hasFallback) {
+                        const idx = TOPICS.findIndex(x => x.cn === t.cn);
+                        if (idx !== -1) covered.add(idx);
+                    }
+                });
+            });
+            covered.forEach(i => missed.delete(i));
+
+            setStep(3);
+            showOverview(covered, missed);
+            showResults();
+            showToast(`串题完成，覆盖 ${covered.size}/${selected.size} 题 ✓`, 'success');
+
+        } catch (err) {
+            console.error(err);
+            let msg = err.message || '生成失败';
+            if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) msg = '网络连接失败，请检查网络';
+            showError(msg);
+        } finally {
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('startBtn').disabled = false;
+        }
+    }
+
+    // ========================================
+    // 历史记录
+    // ========================================
+    function toggleHistorySidebar() {
+        const sidebar = document.getElementById('historySidebar');
+        const backdrop = document.getElementById('historyBackdrop');
+        const isOpen = sidebar.classList.contains('open');
+        if (isOpen) {
+            sidebar.classList.remove('open');
+            backdrop.classList.remove('show');
+        } else {
+            sidebar.classList.add('open');
+            backdrop.classList.add('show');
+            loadHistoryList();
+        }
+    }
+
+    async function loadHistoryList() {
+        const list = document.getElementById('historyList');
+        list.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">加载中...</p>';
+
+        try {
+            const { data: { session } } = await sbClient.auth.getSession();
+            if (!session) { list.innerHTML = '<p class="text-xs text-gray-400 text-center py-8">请先登录</p>'; return; }
+
+            const res = await fetch('/api/histories', {
+                headers: { 'Authorization': `Bearer ${session.access_token}` }
+            });
+            const data = await res.json();
+
+            if (!data.success || !data.histories || data.histories.length === 0) {
+                list.innerHTML = '<p class="text-xs text-gray-400 text-center py-8">暂无记录，快去串题吧 🚀</p>';
+                return;
+            }
+
+            list.innerHTML = data.histories.map(h => {
+                const date = new Date(h.created_at).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                return `
+                    <div onclick="loadHistoryDetail('${h.id}')" class="card rounded-xl p-3 cursor-pointer hover:shadow-md transition-shadow group">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs text-gray-700 leading-relaxed line-clamp-2">${h.experience_preview}</p>
+                                <div class="flex items-center gap-2 mt-1.5">
+                                    <span class="text-xs text-violet-500 font-medium">${h.topic_count} 题</span>
+                                    <span class="text-xs text-gray-400">${date}</span>
+                                </div>
+                            </div>
+                            <span class="text-gray-300 group-hover:text-violet-400 transition-colors text-sm">›</span>
+                        </div>
+                    </div>`;
+            }).join('');
+        } catch (err) {
+            console.error('Load history error:', err);
+            list.innerHTML = '<p class="text-xs text-red-500 text-center py-8">加载失败</p>';
+        }
+    }
+
+    async function loadHistoryDetail(historyId) {
+        try {
+            const { data: { session } } = await sbClient.auth.getSession();
+            if (!session) return;
+
+            const res = await fetch(`/api/history/${historyId}`, {
+                headers: { 'Authorization': `Bearer ${session.access_token}` }
+            });
+            const data = await res.json();
+
+            if (!data.success || !data.history) {
+                showToast('记录加载失败', 'error');
+                return;
+            }
+
+            const h = data.history;
+            results = h.results_json || [];
+
+            // 用历史中的话题更新总览
+            const covered = new Set();
+            results.forEach(g => {
+                g.topics.forEach(t => {
+                    const idx = TOPICS.findIndex(x => x.cn === t.cn);
+                    if (idx !== -1) covered.add(idx);
+                });
+            });
+
+            const allIdx = new Set(TOPICS.map((_, i) => i));
+            const missed = new Set([...allIdx].filter(i => !covered.has(i)));
+
+            hideAll();
+            showOverview(covered, missed);
+            showResults();
+            toggleHistorySidebar();
+            showToast('已加载历史记录 ✓', 'success');
+
+            // 滚动到结果区
+            document.getElementById('overviewSection').scrollIntoView({ behavior: 'smooth' });
+
+        } catch (err) {
+            console.error('Load history detail error:', err);
+            showToast('加载失败', 'error');
+        }
+    }
+
+    // ========================================
+    // 收藏
+    // ========================================
+    async function saveArchive(historyId) {
+        try {
+            const { data: { session } } = await sbClient.auth.getSession();
+            if (!session) { showToast('请先登录', 'error'); return; }
+
+            const res = await fetch('/api/save-archive', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify({ history_id: historyId })
+            });
+
+            const data = await res.json();
+            if (data.success) showToast('已收藏 ⭐', 'success');
+            else showToast(data.error || '收藏失败', 'error');
+        } catch (err) {
+            showToast('收藏失败', 'error');
+        }
+    }
+
+    // ========================================
+    // 加载状态
+    // ========================================
+    function updateLoading(title, sub) {
+        const t = document.getElementById('loadingTitle');
+        const s = document.getElementById('loadingSub');
+        if (t) t.innerHTML = title + '<span class="loading-dots"></span>';
+        if (s) s.textContent = sub;
+    }
+
+    // ========================================
+    // 显示结果
+    // ========================================
+    function showOverview(covered, missed) {
+        const section = document.getElementById('overviewSection');
+        const content = document.getElementById('overviewContent');
+        const coveredList = Array.from(covered).map(i => TOPICS[i]);
+        const missedList = Array.from(missed).map(i => TOPICS[i]);
+
+        let html = `<div class="grid md:grid-cols-2 gap-3 mb-3">
+            <div>
+                <p class="text-xs font-semibold text-green-700 mb-2">✅ 已串 <span class="text-lg">${coveredList.length}</span> 题</p>
+                <div class="flex flex-wrap gap-1">
+                    ${coveredList.length === 0
+                        ? '<span class="text-xs text-gray-400 italic">— 暂无匹配</span>'
+                        : coveredList.map(t => `<span class="stat-done text-xs px-2 py-0.5 rounded-full">${t.cn}</span>`).join('')}
+                </div>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-amber-700 mb-2">⚠️ 未串 <span class="text-lg">${missedList.length}</span> 题</p>
+                <div class="flex flex-wrap gap-1">
+                    ${missedList.length === 0
+                        ? '<span class="text-xs text-green-600 italic">太棒了，全部串题成功！</span>'
+                        : missedList.map(t => `<span class="stat-miss text-xs px-2 py-0.5 rounded-full">${t.cn}</span>`).join('')}
+                </div>
+            </div>
+        </div>`;
+
+        if (missedList.length > 0) {
+            html += `<div class="encourage-hint p-3">
+                <p class="text-xs text-blue-700 leading-relaxed">
+                    💡 以上 ${missedList.length} 个题目与你的经历关联不大，你可以：<br>
+                    &nbsp;&nbsp;① 在上方输入框补充更多相关经历，重新生成<br>
+                    &nbsp;&nbsp;② 这些题目需要单独准备，可稍后单独串
+                </p>
+            </div>`;
+        }
+
+        content.innerHTML = html;
+        section.classList.remove('hidden');
+    }
+
+    function showResults() {
+        const section = document.getElementById('resultsSection');
+        const list = document.getElementById('resultsList');
+        list.innerHTML = results.map((group, gi) => {
+            const hasSharedBody = group.topics.some(t => t.shared_body);
+            const sharedBody = group.topics.find(t => t.shared_body)?.shared_body || '';
+            if (hasSharedBody && sharedBody) return renderChainGroup(group, gi, sharedBody);
+            else return renderFallbackGroup(group, gi);
+        }).join('');
+        section.classList.remove('hidden');
+    }
+
+    function renderChainGroup(group, gi, sharedBody) {
+        const chainedTopics = group.topics.filter(t => t.shared_body);
+        const topicTags = chainedTopics.map(t => `<span class="stat-done text-xs px-2 py-0.5 rounded-full">${t.cn}</span>`).join('');
+        const sharedWc = sharedBody.split(/\s+/).filter(Boolean).length;
+
+        const topicCards = chainedTopics.map((topic, ti) => {
+            const fullScript = [topic.opening, sharedBody, topic.enhancement, topic.ending].filter(Boolean).join('\n\n');
+            const fullWc = fullScript.split(/\s+/).filter(Boolean).length;
+            const openWc = topic.opening ? topic.opening.split(/\s+/).filter(Boolean).length : 0;
+            const enhWc = topic.enhancement ? topic.enhancement.split(/\s+/).filter(Boolean).length : 0;
+            const endWc = topic.ending ? topic.ending.split(/\s+/).filter(Boolean).length : 0;
+
+            return `
+                <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-gray-800">${topic.cn}</p>
+                            <p class="text-xs text-gray-400 italic mt-0.5">${topic.en}</p>
+                        </div>
+                        <div class="flex gap-1.5 flex-shrink-0">
+                            <button onclick="speakFullScript(${gi}, ${chainedTopics.indexOf(topic)}, this)"
+                                class="btn-action speak-btn text-xs px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 font-medium" title="朗读">🔊 朗读</button>
+                            <button onclick="copyFullScript(${gi}, ${chainedTopics.indexOf(topic)})"
+                                class="btn-action text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 font-medium">📋 复制</button>
+                        </div>
+                    </div>
+                    <p class="text-xs text-blue-600 mb-3 leading-relaxed">💡 串题思路：${topic.reason}</p>
+                    ${topic.opening ? `<div class="mb-2.5"><div class="flex items-center gap-1.5 mb-1"><span class="text-xs font-bold text-violet-700 bg-violet-100 px-2 py-0.5 rounded">开头</span><span class="text-xs text-gray-400">${openWc} 词</span></div><div class="script-body py-1.5 pl-3.5 border-l-2 border-violet-300"><p class="text-sm text-gray-700 leading-relaxed">${topic.opening}</p></div></div>` : ''}
+                    ${topic.enhancement ? `<div class="mb-2.5"><div class="flex items-center gap-1.5 mb-1"><span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">强化段</span><span class="text-xs text-gray-400">${enhWc} 词</span></div>${topic.enhancement_note ? `<p class="text-xs text-amber-600 mb-1 leading-relaxed">👉 讲的时候强调：${topic.enhancement_note}</p>` : ''}<div class="script-body py-1.5 pl-3.5 border-l-2 border-amber-300"><p class="text-sm text-gray-700 leading-relaxed">${topic.enhancement}</p></div></div>` : ''}
+                    ${topic.ending ? `<div class="mb-2.5"><div class="flex items-center gap-1.5 mb-1"><span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded">结尾</span><span class="text-xs text-gray-400">${endWc} 词</span></div><div class="script-body py-1.5 pl-3.5 border-l-2 border-green-300"><p class="text-sm text-gray-700 leading-relaxed">${topic.ending}</p></div></div>` : ''}
+                    <div class="mt-2 pt-2 border-t border-gray-50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-gray-400">难度自评：</span>
+                            <div class="star-rating flex gap-0.5" id="stars-${gi}-${ti}">
+                                ${[1,2,3,4,5].map(s => `<span class="star" onclick="rateStar(${gi},${ti},${s})" onmouseenter="hoverStar(${gi},${ti},${s})" onmouseleave="unhoverStar(${gi},${ti})">★</span>`).join('')}
+                            </div>
+                        </div>
+                        <span class="text-xs ${fullWc >= 250 ? 'text-green-600' : fullWc >= 200 ? 'text-amber-500' : 'text-red-500'} font-medium">
+                            全稿 ≈ ${fullWc} 词 ${fullWc < 250 ? '⚠️' : '✓'}
+                        </span>
+                    </div>
+                </div>`;
+        }).join('');
+
+        return `
+            <div class="story-card card rounded-2xl overflow-hidden shadow-sm fade-up" style="animation-delay:${gi * 0.08}s">
+                <div class="px-5 pt-5 pb-3 cursor-pointer" onclick="toggleGroup(${gi})">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1.5">
+                                <span class="text-xs font-bold text-white bg-gradient-to-r from-violet-500 to-purple-500 px-2.5 py-0.5 rounded-full shadow-sm">事例 ${gi + 1}</span>
+                                <span class="text-xs text-violet-600 font-medium bg-violet-50 px-2 py-0.5 rounded-full">🔗 串 ${chainedTopics.length} 题</span>
+                            </div>
+                            <p class="text-sm font-semibold text-gray-800 leading-snug">${group.summary}</p>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300 chevron-${gi}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mt-2">${topicTags}</div>
+                </div>
+                <div id="group-body-${gi}" class="dropdown-content px-5 pb-5">
+                    <div class="bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-200 p-4 mb-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-bold text-violet-700 bg-violet-200 px-2 py-0.5 rounded">📖 共享主体段</span>
+                                <span class="text-xs text-gray-400">${sharedWc} 词（所有题目共用）</span>
+                            </div>
+                            <button onclick="copySharedBody(${gi})" class="btn-action text-xs px-2.5 py-1 bg-white text-violet-600 rounded-lg hover:bg-violet-100 font-medium border border-violet-200">📋 复制</button>
+                        </div>
+                        <div class="script-body py-2 pl-3.5 border-l-2 border-violet-400"><p class="text-sm text-gray-700 leading-relaxed">${sharedBody}</p></div>
+                        <p class="text-xs text-violet-500 mt-2 leading-relaxed">💡 这段是所有题目的共同故事核心，讲的时候不需要每次重背，只需要切换开头和结尾</p>
+                    </div>
+                    <div class="space-y-3">${topicCards}</div>
+                </div>
+            </div>`;
+    }
+
+    function renderFallbackGroup(group, gi) {
+        return `
+            <div class="story-card card rounded-2xl overflow-hidden shadow-sm fade-up" style="animation-delay:${gi * 0.08}s">
+                <div class="px-5 pt-5 pb-3 cursor-pointer" onclick="toggleGroup(${gi})">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex-1 min-w-0">
+                            <span class="text-xs font-bold text-white bg-gradient-to-r from-gray-400 to-gray-500 px-2.5 py-0.5 rounded-full shadow-sm">兜底</span>
+                            <p class="text-sm font-semibold text-gray-800 leading-snug mt-1.5">${group.summary}</p>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300 chevron-${gi}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
+                <div id="group-body-${gi}" class="dropdown-content px-5 pb-5">
+                    <div class="space-y-3">
+                        ${group.topics.map((topic, ti) => `
+                            <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+                                <div class="flex items-start justify-between gap-2 mb-2">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold text-gray-800">${topic.cn}</p>
+                                        <p class="text-xs text-gray-400 italic mt-0.5">${topic.en}</p>
+                                    </div>
+                                    <div class="flex gap-1.5 flex-shrink-0">
+                                        <button onclick="speakFallbackScript(${gi}, ${ti}, this)" class="btn-action speak-btn text-xs px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 font-medium">🔊 朗读</button>
+                                        <button onclick="copyFallbackScript(${gi}, ${ti})" class="btn-action text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 font-medium">📋 复制</button>
+                                    </div>
+                                </div>
+                                <div class="script-body py-2"><p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">${topic.script || '(生成失败)'}</p></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    function toggleGroup(gi) {
+        document.getElementById(`group-body-${gi}`).classList.toggle('open');
+        document.querySelector(`.chevron-${gi}`).classList.toggle('rotate-180');
+    }
+
+    function getFullScript(gi, ti) {
+        const group = results[gi];
+        if (!group) return '';
+        const chained = group.topics.filter(t => t.shared_body);
+        const topic = chained[ti];
+        if (!topic) return '';
+        return [topic.opening, topic.shared_body, topic.enhancement, topic.ending].filter(Boolean).join('\n\n');
+    }
+
+    function copyFullScript(gi, ti) {
+        const s = getFullScript(gi, ti);
+        if (!s) return;
+        navigator.clipboard.writeText(s).then(() => showToast('完整稿已复制 ✓', 'success')).catch(() => showToast('复制失败', 'error'));
+    }
+
+    function copySharedBody(gi) {
+        const body = results[gi]?.topics?.find(t => t.shared_body)?.shared_body || '';
+        if (!body) return;
+        navigator.clipboard.writeText(body).then(() => showToast('共享主体段已复制 ✓', 'success')).catch(() => showToast('复制失败', 'error'));
+    }
+
+    function speakFullScript(gi, ti, btn) { const s = getFullScript(gi, ti); if (s) _speak(s, btn); }
+
+    function copyFallbackScript(gi, ti) {
+        const s = results[gi]?.topics[ti]?.script;
+        if (!s) return;
+        navigator.clipboard.writeText(s).then(() => showToast('已复制 ✓', 'success')).catch(() => showToast('复制失败', 'error'));
+    }
+
+    function speakFallbackScript(gi, ti, btn) { const s = results[gi]?.topics[ti]?.script; if (s) _speak(s, btn); }
+
+    function _speak(script, btn) {
+        if (currentUtterance && speechSynthesis.speaking) {
+            speechSynthesis.cancel(); currentUtterance = null;
+            btn.classList.remove('speaking'); btn.innerHTML = '🔊 朗读'; return;
+        }
+        const u = new SpeechSynthesisUtterance(script);
+        u.lang = 'en-US'; u.rate = 0.9; u.pitch = 1;
+        const v = speechSynthesis.getVoices();
+        const ev = v.find(x => x.lang.startsWith('en') && x.name.includes('Female')) || v.find(x => x.lang.startsWith('en'));
+        if (ev) u.voice = ev;
+        currentUtterance = u;
+        btn.classList.add('speaking'); btn.innerHTML = '⏹ 停止';
+        u.onend = u.onerror = () => { btn.classList.remove('speaking'); btn.innerHTML = '🔊 朗读'; currentUtterance = null; };
+        speechSynthesis.speak(u);
+    }
+
+    // ========================================
+    // 辅助
+    // ========================================
+    function hideAll() {
+        ['loadingSection', 'errorSection', 'resultsSection', 'overviewSection'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+    }
+
+    function showError(msg) {
+        hideAll();
+        document.getElementById('errorMessage').innerHTML = msg.replace(/\n/g, '<br>');
+        document.getElementById('errorSection').classList.remove('hidden');
+    }
+
+    function showToast(msg, type = 'info') {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+        const el = document.createElement('div');
+        el.className = `toast toast-${type}`;
+        el.textContent = msg;
+        document.body.appendChild(el);
+        requestAnimationFrame(() => el.classList.add('show'));
+        setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2200);
+    }
+
+    function initMoodCard() {
+        const idx = new Date().getDate() % ENCOURAGEMENTS.length;
+        document.getElementById('moodText').textContent = ENCOURAGEMENTS[idx];
+    }
+
+    function fillTemplate(index) {
+        const ta = document.getElementById('experienceInput');
+        ta.value = TEMPLATES[index];
+        onInputChange(); ta.focus();
+        showToast('模板已填入，可自由修改 ✓', 'success');
+    }
+
+    function rateStar(gi, ti, rating) {
+        starRatings[`${gi}-${ti}`] = rating;
+        const c = document.getElementById(`stars-${gi}-${ti}`);
+        if (!c) return;
+        c.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('active', i < rating));
+    }
+
+    function hoverStar(gi, ti, upTo) {
+        const c = document.getElementById(`stars-${gi}-${ti}`);
+        if (!c) return;
+        c.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('active', i < upTo));
+    }
+
+    function unhoverStar(gi, ti) {
+        const rating = starRatings[`${gi}-${ti}`] || 0;
+        const c = document.getElementById(`stars-${gi}-${ti}`);
+        if (!c) return;
+        c.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('active', i < rating));
+    }
+
+    function setStep(stepNum) {
+        for (let i = 1; i <= 3; i++) {
+            const el = document.getElementById(`step${i}`);
+            if (!el) continue;
+            el.classList.remove('active', 'done');
+            if (i < stepNum) el.classList.add('done');
+            else if (i === stepNum) el.classList.add('active');
+        }
+    }
+    </script>
+</body>
+</html>
