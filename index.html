@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>题链扣 — 懂你的雅思串题搭子</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -400,13 +400,17 @@
     let sbClient = null;
     const SUPABASE_URL = 'https://hzxmlqbreskespfwybkj.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6eG1scWJyZXNrZXNwZnd5YmtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzE4ODUsImV4cCI6MjA5MjkwNzg4NX0.D64mydX7C2agfeuxTGbYjXuM_vR7HZS1uVV5ShrIbAE';
-    // 用固定占位符判断是否已配置（填入真实值后，URL 会以 https:// 开头）
     const SUPABASE_CONFIGURED = SUPABASE_URL.startsWith('https://') && SUPABASE_ANON_KEY.length > 50;
-    if (SUPABASE_CONFIGURED && window.supabase) {
-        try {
-            sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (e) {
-            console.warn('Supabase 初始化失败:', e);
+
+    if (SUPABASE_CONFIGURED) {
+        if (window.supabase) {
+            try {
+                sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } catch (e) {
+                console.warn('Supabase 初始化失败:', e);
+            }
+        } else {
+            console.warn('Supabase SDK 未加载（可能被浏览器拦截），部分功能不可用');
         }
     }
 
@@ -738,6 +742,12 @@
             return;
         }
 
+        // CDN 被拦截导致 Supabase 客户端未加载
+        if (!sbClient) {
+            showError('浏览器拦截了 Supabase SDK，请关闭"跟踪防护"后刷新页面重试');
+            return;
+        }
+
         hideAll();
         document.getElementById('loadingSection').classList.remove('hidden');
         document.getElementById('startBtn').disabled = true;
@@ -763,7 +773,12 @@
                 body: JSON.stringify({ experience: exp, topics: selectedTopics })
             });
 
-            const data = await res.json();
+            // 安全解析 JSON（防止非 JSON 响应导致崩溃）
+            let data;
+            const respText = await res.text();
+            try { data = JSON.parse(respText); } catch {
+                throw new Error(`服务器返回了非 JSON 数据 (${res.status}): ${respText.substring(0, 200)}`);
+            }
 
             if (!res.ok) {
                 throw new Error(data.error || `服务器错误 (${res.status})`);
