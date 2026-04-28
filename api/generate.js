@@ -1,9 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+import { verifyUser, sbInsert } from './lib/supabase.js';
 
 // =============================================
 // Phase 1: 分组 Prompt
@@ -289,6 +284,7 @@ async function generateFallbackGroup(experience, topics) {
 // 主入口
 // =============================================
 export default async function handler(req, res) {
+  // CORS
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -301,8 +297,8 @@ export default async function handler(req, res) {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: '未提供认证 token' });
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) return res.status(401).json({ error: '认证失败，请重新登录' });
+    const user = await verifyUser(token);
+    if (!user) return res.status(401).json({ error: '认证失败，请重新登录' });
 
     // 解析请求体
     const { experience, topics } = req.body;
@@ -338,15 +334,15 @@ export default async function handler(req, res) {
     }
 
     // 存入数据库
-    const { error: dbError } = await supabase.from('histories').insert({
-      user_id: user.id,
-      experience,
-      selected_topics: topics,
-      results_json: results
-    });
-
-    if (dbError) {
-      console.error('DB save error:', dbError);
+    try {
+      await sbInsert('histories', {
+        user_id: user.id,
+        experience,
+        selected_topics: topics,
+        results_json: results
+      });
+    } catch (dbErr) {
+      console.error('DB save error:', dbErr);
       // 仍然返回结果，只是没存档
     }
 

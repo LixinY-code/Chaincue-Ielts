@@ -1,9 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+import { verifyUser, sbQuery } from './lib/supabase.js';
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
@@ -17,17 +12,16 @@ export default async function handler(req, res) {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: '未提供认证 token' });
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) return res.status(401).json({ error: '认证失败' });
+    const user = await verifyUser(token);
+    if (!user) return res.status(401).json({ error: '认证失败' });
 
-    const { data, error } = await supabase
-      .from('histories')
-      .select('id, created_at, experience, selected_topics, results_json')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    if (error) throw error;
+    const data = await sbQuery('histories', {
+      select: 'id,created_at,experience,selected_topics,results_json',
+      eq: { user_id: user.id },
+      order: 'created_at',
+      ascending: false,
+      limit: 50
+    });
 
     const histories = (data || []).map(h => ({
       id: h.id,
