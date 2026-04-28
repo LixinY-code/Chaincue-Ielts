@@ -1,6 +1,5 @@
 {
-  "framework": null,
-  "buildCommand": null,
+  "buildCommand": "npm install",
   "outputDirectory": ".",
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
