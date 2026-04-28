@@ -400,8 +400,8 @@
     let sbClient = null;
     const SUPABASE_URL = 'https://hzxmlqbreskespfwybkj.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6eG1scWJyZXNrZXNwZnd5YmtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzE4ODUsImV4cCI6MjA5MjkwNzg4NX0.D64mydX7C2agfeuxTGbYjXuM_vR7HZS1uVV5ShrIbAE';
-    const SUPABASE_CONFIGURED = SUPABASE_URL !== 'https://hzxmlqbreskespfwybkj.supabase.co' && SUPABASE_ANON_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6eG1scWJyZXNrZXNwZnd5YmtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzE4ODUsImV4cCI6MjA5MjkwNzg4NX0.D64mydX7C2agfeuxTGbYjXuM_vR7HZS1uVV5ShrIbAE';
-
+    // 用固定占位符判断是否已配置（填入真实值后，URL 会以 https:// 开头）
+    const SUPABASE_CONFIGURED = SUPABASE_URL.startsWith('https://') && SUPABASE_ANON_KEY.length > 50;
     if (SUPABASE_CONFIGURED && window.supabase) {
         try {
             sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
