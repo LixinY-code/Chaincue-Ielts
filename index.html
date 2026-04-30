@@ -281,6 +281,7 @@
                             class="btn-main px-6 py-3 rounded-xl text-sm font-semibold text-white btn-action">
                             ✨ 开始串题
                         </button>
+                        <span id="loginHint" class="text-xs text-gray-400 ml-2 self-center hidden">💡 请先登录后使用串题功能</span>
                     </div>
                 </div>
             </section>
@@ -725,6 +726,15 @@
         // Supabase 未配置时不需要登录；已配置时必须登录
         const needAuth = SUPABASE_CONFIGURED && !currentUser;
         document.getElementById('startBtn').disabled = !exp || selected.size === 0 || needAuth;
+        // 显示/隐藏登录提示
+        const hint = document.getElementById('loginHint');
+        if (hint) {
+            if (needAuth && exp && selected.size > 0) {
+                hint.classList.remove('hidden');
+            } else {
+                hint.classList.add('hidden');
+            }
+        }
     }
 
     // ========================================
