@@ -532,14 +532,20 @@
         renderTopics();
         initMoodCard();
         initAnnouncement();
-        document.getElementById('experienceInput').addEventListener('input', onInputChange);
+        const expInput = document.getElementById('experienceInput');
+        expInput.addEventListener('input', onInputChange);
+        // 中文输入法组合结束后重新检查按钮状态
+        expInput.addEventListener('compositionend', onInputChange);
         // 禁用状态按钮点击提示
         document.getElementById('startBtn').addEventListener('mousedown', function(e) {
             if (this.disabled) {
                 e.preventDefault();
-                if (sbClient && !currentUser) showToast('请先登录 / 注册，完全免费', 'info');
-                else if (!document.getElementById('experienceInput').value.trim()) showToast('请先输入你的真实经历', 'info');
+                const exp = document.getElementById('experienceInput').value.trim();
+                const needAuth = sbClient && !currentUser;
+                if (needAuth) showToast('请先登录 / 注册，完全免费', 'info');
+                else if (!exp) showToast('请先输入你的真实经历', 'info');
                 else if (selected.size === 0) showToast('请至少选择一道题目', 'info');
+                else showToast('按钮状态异常，请刷新页面重试', 'info');
             }
         });
     });
@@ -787,11 +793,14 @@
         const exp = document.getElementById('experienceInput').value.trim();
         // 只有 Supabase SDK 加载成功且未登录时才限制
         const needAuth = sbClient && !currentUser;
-        document.getElementById('startBtn').disabled = !exp || selected.size === 0 || needAuth;
+        const shouldDisable = !exp || selected.size === 0 || needAuth;
+        const btn = document.getElementById('startBtn');
+        btn.disabled = shouldDisable;
         // 显示/隐藏登录提示
         const hint = document.getElementById('loginHint');
         if (hint) {
             if (needAuth && exp && selected.size > 0) {
+                hint.textContent = '💡 请先登录后使用串题功能';
                 hint.classList.remove('hidden');
             } else {
                 hint.classList.add('hidden');
