@@ -140,6 +140,16 @@
         .user-menu.show { display: block; }
         .user-menu-item { padding: 10px 16px; font-size: 13px; color: #374151; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 8px; }
         .user-menu-item:hover { background: #f3f0ff; }
+
+        /* 分类筛选按钮 */
+        .cat-filter-btn { padding: 4px 14px; border-radius: 99px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; border: 1px solid #e5e7eb; background: #fff; color: #6b7280; }
+        .cat-filter-btn:hover { border-color: #a78bfa; color: #7c3aed; background: #faf5ff; }
+        .cat-filter-btn.active { background: #7c3aed; color: #fff; border-color: #7c3aed; box-shadow: 0 2px 8px rgba(124,58,237,0.25); }
+
+        /* 公告弹窗 */
+        .announce-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); backdrop-filter: blur(3px); z-index: 200; display: none; align-items: center; justify-content: center; }
+        .announce-overlay.show { display: flex; }
+        .announce-box { background: rgba(255,255,255,0.96); backdrop-filter: blur(20px); border-radius: 20px; padding: 2rem; width: 420px; max-width: 90vw; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15); border: 1px solid rgba(139,92,246,0.15); }
     </style>
 </head>
 
@@ -221,9 +231,16 @@
                     </p>
                 </div>
 
+                <!-- 分类筛选 -->
+                <div id="categoryFilters" class="flex gap-1.5 mb-3 flex-wrap">
+                    <button class="cat-filter-btn active" data-cat="all" onclick="filterByCategory(null, this)">📋 全部</button>
+                    <button class="cat-filter-btn" data-cat="person" onclick="filterByCategory('person', this)">👤 人</button>
+                    <button class="cat-filter-btn" data-cat="event" onclick="filterByCategory('event', this)">📖 事</button>
+                    <button class="cat-filter-btn" data-cat="object" onclick="filterByCategory('object', this)">🎁 物</button>
+                    <button class="cat-filter-btn" data-cat="place" onclick="filterByCategory('place', this)">🌍 地</button>
+                </div>
+
                 <div class="flex items-center justify-between mb-3">
-                    <p class="text-xs text-gray-500">
-                        共 <strong id="totalCount" class="text-violet-600">43</strong> 道题，已选 <strong id="selectedCount" class="text-violet-600">0</strong> 道
                     </p>
                     <div class="w-32 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div id="selectionBar" class="h-full bg-gradient-to-r from-violet-500 to-pink-500 rounded-full transition-all duration-300" style="width: 0%"></div>
@@ -394,6 +411,22 @@
         </div>
     </div>
 
+    <!-- ===== 更新公告弹窗 ===== -->
+    <div id="announceModal" class="announce-overlay" onclick="closeAnnouncement()">
+        <div class="announce-box" onclick="event.stopPropagation()">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="text-xl">📢</span>
+                <h3 class="text-base font-bold text-gray-800">题链扣 v1.1 更新公告</h3>
+            </div>
+            <div class="space-y-2.5 text-sm text-gray-700 leading-relaxed mb-5">
+                <p>✨ 新增<strong>【题目分类】</strong>功能：按"人 / 事 / 物 / 地"筛选，新手也能快速找到适合自己的话题。</p>
+                <p>🔐 现在需要登录后才能使用"开始串题"按钮（注册免费）。</p>
+                <p>💡 内测用户永久保留免费权益，感谢支持！</p>
+            </div>
+            <button onclick="closeAnnouncement()" class="btn-main w-full py-2.5 rounded-xl text-sm font-semibold text-white">我知道了</button>
+        </div>
+    </div>
+
     <script>
     // ========================================
     // Supabase 配置（部署时替换为你的实际值）
@@ -417,51 +450,52 @@
 
     // ========================================
     // 2026年5-8月 Part 2 题库（43道）
+    // 分类规则：person=描述人物/关系，event=经历/活动/建议，object=物品/书/故事/App，place=地点/场所
     // ========================================
     let TOPICS = [
-        { cn: "完美工作", en: "Describe your perfect job" },
-        { cn: "想见的名人", en: "Describe a famous person you would like to meet" },
-        { cn: "禁用手机的场合", en: "Describe an occasion when you were not allowed to use your mobile phone" },
-        { cn: "给别人建议", en: "Describe a time when you gave advice to others" },
-        { cn: "外国短期停留", en: "Describe a foreign country you would like to stay or work for a short period" },
-        { cn: "想拥有的科技产品", en: "Describe a piece of technology (not a phone) that you would like to own" },
-        { cn: "常做计划的人", en: "Describe a person who makes plans a lot" },
-        { cn: "喜欢画画的朋友", en: "Describe a friend of yours who loves drawing/painting" },
-        { cn: "App/程序", en: "Describe a program or app on your computer or phone" },
-        { cn: "最近读过的故事", en: "Describe a story you have read recently" },
-        { cn: "微笑的场合", en: "Describe an occasion when many people were smiling" },
-        { cn: "为家人骄傲", en: "Describe a time when you felt proud of a family member" },
-        { cn: "对家庭重要的东西", en: "Describe something important that has been kept in your family for a long time" },
-        { cn: "商城", en: "Describe a shopping mall you know well" },
-        { cn: "想了解的野生动物", en: "Describe a wild animal that you want to learn more about" },
-        { cn: "擅长音乐的朋友", en: "Describe a friend of yours who is good at music/singing" },
-        { cn: "重要的好朋友", en: "Describe a good friend who is important to you" },
-        { cn: "迷路", en: "Describe an occasion when you lost your way" },
-        { cn: "家族企业工作的人", en: "Describe a person you know who enjoys working for a family business" },
-        { cn: "想提升的天赋", en: "Describe a natural talent (sports, music, etc.) you want to improve" },
-        { cn: "和亲友享受的晚餐", en: "Describe a great dinner you enjoyed with friends or family" },
-        { cn: "想再去一次的远行", en: "Describe a long journey you had and would like to take again" },
-        { cn: "传统故事", en: "Describe an interesting traditional story" },
-        { cn: "突然停电", en: "Describe a time when the electricity suddenly went off" },
-        { cn: "别人向你道歉", en: "Describe a time when someone apologized to you" },
-        { cn: "学习朋友好习惯", en: "Describe a good habit your friend has and you want to develop" },
-        { cn: "第一次尝试的兴奋活动", en: "Describe an exciting activity you have tried for the first time" },
-        { cn: "钦佩的有创造力的人", en: "Describe a creative person (artist, musician, architect, etc.) you admire" },
-        { cn: "家中重要老物件", en: "Describe an important old thing that your family has kept" },
-        { cn: "第一次用外语", en: "Describe the time when you first talked in a foreign language" },
-        { cn: "社交媒体趣事", en: "Describe a time you saw something interesting on social media" },
-        { cn: "弄坏东西", en: "Describe a time when you broke something" },
-        { cn: "感兴趣的科学学科", en: "Describe an area/subject of science that you are interested in" },
-        { cn: "有用的书", en: "Describe a book you read that you found useful" },
-        { cn: "钦佩的运动员", en: "Describe a successful sportsperson you admire" },
-        { cn: "童年喜欢的玩具", en: "Describe a toy you liked in your childhood" },
-        { cn: "别人帮忙下做的决定", en: "Describe an important decision made with the help of others" },
-        { cn: "等待特别事情", en: "Describe a time when you waited for something special" },
-        { cn: "购物服务", en: "Describe a time when you received good service in a shop" },
-        { cn: "自然之地", en: "Describe a natural place (parks, mountains, etc.)" },
-        { cn: "让你失望的电影", en: "Describe a movie you watched that you felt disappointed about" },
-        { cn: "生活中离不开的东西", en: "Describe something that you can't live without (not a computer/phone)" },
-        { cn: "家里放松的地方", en: "Describe your favorite place in your house where you can relax" }
+        { cn: "完美工作", en: "Describe your perfect job", category: "event" },
+        { cn: "想见的名人", en: "Describe a famous person you would like to meet", category: "person" },
+        { cn: "禁用手机的场合", en: "Describe an occasion when you were not allowed to use your mobile phone", category: "event" },
+        { cn: "给别人建议", en: "Describe a time when you gave advice to others", category: "event" },
+        { cn: "外国短期停留", en: "Describe a foreign country you would like to stay or work for a short period", category: "place" },
+        { cn: "想拥有的科技产品", en: "Describe a piece of technology (not a phone) that you would like to own", category: "object" },
+        { cn: "常做计划的人", en: "Describe a person who makes plans a lot", category: "person" },
+        { cn: "喜欢画画的朋友", en: "Describe a friend of yours who loves drawing/painting", category: "person" },
+        { cn: "App/程序", en: "Describe a program or app on your computer or phone", category: "object" },
+        { cn: "最近读过的故事", en: "Describe a story you have read recently", category: "object" },
+        { cn: "微笑的场合", en: "Describe an occasion when many people were smiling", category: "event" },
+        { cn: "为家人骄傲", en: "Describe a time when you felt proud of a family member", category: "person" },
+        { cn: "对家庭重要的东西", en: "Describe something important that has been kept in your family for a long time", category: "object" },
+        { cn: "商城", en: "Describe a shopping mall you know well", category: "place" },
+        { cn: "想了解的野生动物", en: "Describe a wild animal that you want to learn more about", category: "object" },
+        { cn: "擅长音乐的朋友", en: "Describe a friend of yours who is good at music/singing", category: "person" },
+        { cn: "重要的好朋友", en: "Describe a good friend who is important to you", category: "person" },
+        { cn: "迷路", en: "Describe an occasion when you lost your way", category: "event" },
+        { cn: "家族企业工作的人", en: "Describe a person you know who enjoys working for a family business", category: "person" },
+        { cn: "想提升的天赋", en: "Describe a natural talent (sports, music, etc.) you want to improve", category: "event" },
+        { cn: "和亲友享受的晚餐", en: "Describe a great dinner you enjoyed with friends or family", category: "event" },
+        { cn: "想再去一次的远行", en: "Describe a long journey you had and would like to take again", category: "event" },
+        { cn: "传统故事", en: "Describe an interesting traditional story", category: "object" },
+        { cn: "突然停电", en: "Describe a time when the electricity suddenly went off", category: "event" },
+        { cn: "别人向你道歉", en: "Describe a time when someone apologized to you", category: "event" },
+        { cn: "学习朋友好习惯", en: "Describe a good habit your friend has and you want to develop", category: "person" },
+        { cn: "第一次尝试的兴奋活动", en: "Describe an exciting activity you have tried for the first time", category: "event" },
+        { cn: "钦佩的有创造力的人", en: "Describe a creative person (artist, musician, architect, etc.) you admire", category: "person" },
+        { cn: "家中重要老物件", en: "Describe an important old thing that your family has kept", category: "object" },
+        { cn: "第一次用外语", en: "Describe the time when you first talked in a foreign language", category: "event" },
+        { cn: "社交媒体趣事", en: "Describe a time you saw something interesting on social media", category: "event" },
+        { cn: "弄坏东西", en: "Describe a time when you broke something", category: "event" },
+        { cn: "感兴趣的科学学科", en: "Describe an area/subject of science that you are interested in", category: "object" },
+        { cn: "有用的书", en: "Describe a book you read that you found useful", category: "object" },
+        { cn: "钦佩的运动员", en: "Describe a successful sportsperson you admire", category: "person" },
+        { cn: "童年喜欢的玩具", en: "Describe a toy you liked in your childhood", category: "object" },
+        { cn: "别人帮忙下做的决定", en: "Describe an important decision made with the help of others", category: "event" },
+        { cn: "等待特别事情", en: "Describe a time when you waited for something special", category: "event" },
+        { cn: "购物服务", en: "Describe a time when you received good service in a shop", category: "event" },
+        { cn: "自然之地", en: "Describe a natural place (parks, mountains, etc.)", category: "place" },
+        { cn: "让你失望的电影", en: "Describe a movie you watched that you felt disappointed about", category: "object" },
+        { cn: "生活中离不开的东西", en: "Describe something that you can't live without (not a computer/phone)", category: "object" },
+        { cn: "家里放松的地方", en: "Describe your favorite place in your house where you can relax", category: "place" }
     ];
 
     let selected = new Set();
@@ -471,6 +505,7 @@
     let currentUser = null;
     let authMode = 'login'; // 'login' | 'register'
     let lastHistoryId = null;
+    let activeCategory = null; // null = 全部
 
     const TEMPLATES = [
         '上个月我和三个朋友去爬白云山，结果走错了一条小路，在山上迷路了快一个小时。最后遇到一个当地的大叔带我们下了山，下山后我们在山脚的小吃店吃了一顿特别满足的饭，大家聊了很多以前的事情。',
@@ -496,7 +531,17 @@
         initAuth();
         renderTopics();
         initMoodCard();
+        initAnnouncement();
         document.getElementById('experienceInput').addEventListener('input', onInputChange);
+        // 禁用状态按钮点击提示
+        document.getElementById('startBtn').addEventListener('mousedown', function(e) {
+            if (this.disabled) {
+                e.preventDefault();
+                if (SUPABASE_CONFIGURED && !currentUser) showToast('请先登录 / 注册，完全免费', 'info');
+                else if (!document.getElementById('experienceInput').value.trim()) showToast('请先输入你的真实经历', 'info');
+                else if (selected.size === 0) showToast('请至少选择一道题目', 'info');
+            }
+        });
     });
 
     // ========================================
@@ -626,19 +671,36 @@
     // ========================================
     // 题目网格
     // ========================================
-    function renderTopics() {
+    function renderTopics(isInit = true) {
         const grid = document.getElementById('topicGrid');
-        grid.innerHTML = TOPICS.map((t, i) => `
-            <label class="topic-tag flex items-start gap-1.5 p-2 rounded-xl border border-gray-200 select-none" data-i="${i}">
-                <input type="checkbox" class="topic-check mt-0.5 flex-shrink-0" value="${i}" checked onchange="toggleTopic(${i})">
+        const filtered = activeCategory
+            ? TOPICS.map((t, i) => ({ ...t, _idx: i })).filter(t => t.category === activeCategory)
+            : TOPICS.map((t, i) => ({ ...t, _idx: i }));
+
+        grid.innerHTML = filtered.map((t) => {
+            const i = t._idx;
+            const isChecked = isInit || selected.has(i);
+            return `
+            <label class="topic-tag flex items-start gap-1.5 p-2 rounded-xl border border-gray-200 select-none ${isChecked ? 'active' : ''}" data-i="${i}">
+                <input type="checkbox" class="topic-check mt-0.5 flex-shrink-0" value="${i}" ${isChecked ? 'checked' : ''} onchange="toggleTopic(${i})">
                 <div class="min-w-0">
                     <div class="text-xs font-medium text-gray-700 leading-snug">${t.cn}</div>
                     <div class="text-xs text-gray-400 leading-snug truncate">${t.en}</div>
                 </div>
-            </label>
-        `).join('');
-        selected = new Set(TOPICS.map((_, i) => i));
+            </label>`;
+        }).join('');
+
+        if (isInit) {
+            selected = new Set(TOPICS.map((_, i) => i));
+        }
         updateCount();
+    }
+
+    function filterByCategory(cat, btn) {
+        activeCategory = cat;
+        document.querySelectorAll('.cat-filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        renderTopics(false);
     }
 
     function selectAll() {
@@ -706,7 +768,7 @@
                         if (cn && en) { parts = { cn, en }; break; }
                     }
                 }
-                if (parts) newTopics.push(parts);
+                if (parts) newTopics.push({ ...parts, category: 'event' });
             }
             if (newTopics.length === 0) { showToast('未能解析到题目，请检查文件格式', 'error'); return; }
             const existingCn = new Set(TOPICS.map(t => t.cn));
@@ -1221,6 +1283,18 @@
         ta.value = TEMPLATES[index];
         onInputChange(); ta.focus();
         showToast('模板已填入，可自由修改 ✓', 'success');
+    }
+
+    function initAnnouncement() {
+        const ANNOUNCE_KEY = 'tlk_announcement_v1';
+        if (!localStorage.getItem(ANNOUNCE_KEY)) {
+            document.getElementById('announceModal').classList.add('show');
+            localStorage.setItem(ANNOUNCE_KEY, '1');
+        }
+    }
+
+    function closeAnnouncement() {
+        document.getElementById('announceModal').classList.remove('show');
     }
 
     function rateStar(gi, ti, rating) {
