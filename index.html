@@ -53,9 +53,9 @@
         .input-field:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12), 0 4px 20px rgba(139, 92, 246, 0.08); background: #fff; }
 
         .btn-main { background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); box-shadow: 0 4px 15px rgba(124, 58, 237, 0.35); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-        .btn-main:hover:not(:disabled) { box-shadow: 0 6px 25px rgba(124, 58, 237, 0.5); transform: translateY(-1px); }
-        .btn-main:active:not(:disabled) { transform: translateY(0px) scale(0.98); }
-        .btn-main:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+        .btn-main:disabled, .btn-main.btn-disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+        .btn-main:hover:not(:disabled):not(.btn-disabled) { box-shadow: 0 6px 25px rgba(124, 58, 237, 0.5); transform: translateY(-1px); }
+        .btn-main:active:not(:disabled):not(.btn-disabled) { transform: translateY(0px) scale(0.98); }
 
         .btn-secondary { background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.2); color: #7c3aed; transition: all 0.2s ease; }
         .btn-secondary:hover { background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.35); }
@@ -294,8 +294,8 @@
                         <button onclick="clearInput()" class="btn-secondary px-4 py-2.5 rounded-xl text-sm btn-action">
                             重置
                         </button>
-                        <button id="startBtn" onclick="startMatching()" disabled
-                            class="btn-main px-6 py-3 rounded-xl text-sm font-semibold text-white btn-action">
+                        <button id="startBtn" onclick="startMatching()"
+                            class="btn-main px-6 py-3 rounded-xl text-sm font-semibold text-white btn-action btn-disabled">
                             ✨ 开始串题
                         </button>
                         <span id="loginHint" class="text-xs text-gray-400 ml-2 self-center hidden">💡 请先登录后使用串题功能</span>
@@ -534,20 +534,7 @@
         initAnnouncement();
         const expInput = document.getElementById('experienceInput');
         expInput.addEventListener('input', onInputChange);
-        // 中文输入法组合结束后重新检查按钮状态
         expInput.addEventListener('compositionend', onInputChange);
-        // 禁用状态按钮点击提示
-        document.getElementById('startBtn').addEventListener('mousedown', function(e) {
-            if (this.disabled) {
-                e.preventDefault();
-                const exp = document.getElementById('experienceInput').value.trim();
-                const needAuth = sbClient && !currentUser;
-                if (needAuth) showToast('请先登录 / 注册，完全免费', 'info');
-                else if (!exp) showToast('请先输入你的真实经历', 'info');
-                else if (selected.size === 0) showToast('请至少选择一道题目', 'info');
-                else showToast('按钮状态异常，请刷新页面重试', 'info');
-            }
-        });
     });
 
     // ========================================
@@ -791,11 +778,10 @@
 
     function checkBtn() {
         const exp = document.getElementById('experienceInput').value.trim();
-        // 只有 Supabase SDK 加载成功且未登录时才限制
         const needAuth = sbClient && !currentUser;
         const shouldDisable = !exp || selected.size === 0 || needAuth;
         const btn = document.getElementById('startBtn');
-        btn.disabled = shouldDisable;
+        btn.classList.toggle('btn-disabled', shouldDisable);
         // 显示/隐藏登录提示
         const hint = document.getElementById('loginHint');
         if (hint) {
@@ -934,9 +920,10 @@
 
     async function startMatching() {
         const exp = document.getElementById('experienceInput').value.trim();
-        if (!exp) { showError('请输入个人经历'); return; }
-        if (sbClient && !currentUser) { showError('请先登录'); openAuthModal(); return; }
-        if (selected.size === 0) { showError('请至少选择一个题目'); return; }
+        // 前置校验（用 toast 提示而非 disabled 拦截）
+        if (sbClient && !currentUser) { showToast('请先登录 / 注册，完全免费', 'info'); openAuthModal(); return; }
+        if (!exp) { showToast('请先输入你的真实经历', 'info'); document.getElementById('experienceInput').focus(); return; }
+        if (selected.size === 0) { showToast('请至少选择一道题目', 'info'); return; }
 
         if (!SUPABASE_CONFIGURED) {
             showError('请先配置 Supabase（参考 README.md）或将 index.html 替换为桌面上的单页版使用');
@@ -950,7 +937,7 @@
 
         hideAll();
         document.getElementById('loadingSection').classList.remove('hidden');
-        document.getElementById('startBtn').disabled = true;
+        document.getElementById('startBtn').classList.add('btn-disabled');
         setStep(1);
         updateLoading('🔍 正在解析经历要素...', '分析 who/what/when/where/how');
 
@@ -1031,10 +1018,12 @@
             console.error(err);
             let msg = err.message || '生成失败';
             if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) msg = '网络连接失败，请检查网络';
+            if (msg.includes('500') || msg.includes('upstream error')) msg = 'AI 服务暂时不可用，请稍后重试';
+            if (msg.includes('超时')) msg = '请求超时，请稍后重试';
             showError(msg);
         } finally {
             document.getElementById('loadingSection').classList.add('hidden');
-            document.getElementById('startBtn').disabled = false;
+            document.getElementById('startBtn').classList.remove('btn-disabled');
         }
     }
 
