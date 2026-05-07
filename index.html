@@ -811,19 +811,138 @@
     // ========================================
     // 核心：调用后端两阶段串题
     // ========================================
+
+    // 【新增】要素解析 API 调用
+    async function parseExperience(token, experience) {
+        try {
+            const res = await fetch('/api/parse-experience', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ experience })
+            });
+            const respText = await res.text();
+            let data;
+            try { data = JSON.parse(respText); } catch { return null; }
+            if (!res.ok || !data.success) return null;
+            return data.elements; // { who, what, when, where, how }
+        } catch (err) {
+            console.warn('解析经历要素失败，将跳过解析:', err);
+            return null;
+        }
+    }
+
+    // 【新增】在 loadingSection 内显示补全表单，返回 Promise resolve 最终的 experience
+    function showSupplementForm(originalExp, missingElements) {
+        return new Promise((resolve) => {
+            const section = document.getElementById('loadingSection');
+            const elementLabels = {
+                who: { label: '👤 Who — 谁', placeholder: '例：我的好朋友小李、一位退休美术教授' },
+                what: { label: '🎯 What — 做了什么', placeholder: '例：一起爬山迷路后遇到好心人带下山' },
+                when: { label: '📅 When — 何时', placeholder: '例：去年暑假、上个月某个周末' },
+                where: { label: '📍 Where — 在哪', placeholder: '例：白云山、学校旁边一家咖啡店' },
+                how: { label: '😄 How — 感受如何', placeholder: '例：当时很害怕但后来觉得很温暖' }
+            };
+            const missingKeys = Object.keys(missingElements).filter(k => missingElements[k] === null);
+
+            // 构建 HTML 恢复 loadingSection 原有结构 + 插入表单
+            section.innerHTML = `
+                <div class="text-center mb-5">
+                    <div class="inline-flex items-center gap-2 mb-2">
+                        <span class="text-xl">🔍</span>
+                        <p class="text-sm font-semibold text-gray-700">经历要素分析</p>
+                    </div>
+                    <p class="text-xs text-gray-500">已自动识别你的经历，以下信息可以补充（选填）</p>
+                </div>
+                <div class="max-w-md mx-auto">
+                    ${missingKeys.map(k => `
+                        <div class="mb-3">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">${elementLabels[k].label}</label>
+                            <input type="text" data-element="${k}" placeholder="${elementLabels[k].placeholder}"
+                                class="input-field w-full px-3.5 py-2.5 rounded-xl text-sm" />
+                        </div>
+                    `).join('')}
+                    <div class="flex gap-2 mt-5">
+                        <button id="skipSupplementBtn" class="btn-secondary flex-1 py-2.5 rounded-xl text-sm font-medium btn-action">
+                            跳过，直接生成
+                        </button>
+                        <button id="submitSupplementBtn" class="btn-main flex-1 py-2.5 rounded-xl text-sm font-semibold text-white btn-action">
+                            ✨ 补充后生成
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 text-center mt-2">补充内容会追加到你的经历末尾，让串题更精准</p>
+                </div>
+            `;
+            section.classList.remove('hidden');
+
+            // 跳过：用原始 experience
+            document.getElementById('skipSupplementBtn').addEventListener('click', () => {
+                resolve(originalExp);
+            });
+
+            // 补充后生成
+            document.getElementById('submitSupplementBtn').addEventListener('click', () => {
+                const inputs = section.querySelectorAll('input[data-element]');
+                const supplements = [];
+                inputs.forEach(input => {
+                    const val = input.value.trim();
+                    if (val) {
+                        const k = input.dataset.element;
+                        const labelMap = { who: '人物', what: '事件', when: '时间', where: '地点', how: '感受' };
+                        supplements.push(`${labelMap[k]}：${val}`);
+                    }
+                });
+                if (supplements.length > 0) {
+                    resolve(originalExp + '\n\n补充：' + supplements.join('，'));
+                } else {
+                    resolve(originalExp);
+                }
+            });
+        });
+    }
+
+    // 【新增】恢复 loadingSection 为原始加载状态
+    function restoreLoadingUI() {
+        const section = document.getElementById('loadingSection');
+        section.innerHTML = `
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-[3px] border-violet-100 border-t-violet-600 mb-4"></div>
+            <p id="loadingTitle" class="text-base font-medium text-gray-700">
+                AI 正在分析经历<span class="loading-dots"></span>
+            </p>
+            <p id="loadingSub" class="text-xs text-gray-400 mt-1 mb-4">准备分组...</p>
+            <div class="w-full max-w-xs mx-auto loading-bar mb-5"></div>
+            <div class="flex justify-center gap-3 flex-wrap">
+                <div id="step1" class="step-item">
+                    <span class="step-dot"></span>
+                    <span>⏳ 分析关键词</span>
+                </div>
+                <div class="text-gray-300 text-xs self-center">→</div>
+                <div id="step2" class="step-item">
+                    <span class="step-dot"></span>
+                    <span>🔗 匹配分组</span>
+                </div>
+                <div class="text-gray-300 text-xs self-center">→</div>
+                <div id="step3" class="step-item">
+                    <span class="step-dot"></span>
+                    <span>✍️ 编写口语稿</span>
+                </div>
+            </div>
+        `;
+    }
+
     async function startMatching() {
         const exp = document.getElementById('experienceInput').value.trim();
         if (!exp) { showError('请输入个人经历'); return; }
         if (sbClient && !currentUser) { showError('请先登录'); openAuthModal(); return; }
         if (selected.size === 0) { showError('请至少选择一个题目'); return; }
 
-        // Supabase 未配置时提示用户需要配置后端
         if (!SUPABASE_CONFIGURED) {
             showError('请先配置 Supabase（参考 README.md）或将 index.html 替换为桌面上的单页版使用');
             return;
         }
 
-        // CDN 被拦截导致 Supabase 客户端未加载
         if (!sbClient) {
             showError('浏览器拦截了 Supabase SDK，请关闭"跟踪防护"后刷新页面重试');
             return;
@@ -833,7 +952,7 @@
         document.getElementById('loadingSection').classList.remove('hidden');
         document.getElementById('startBtn').disabled = true;
         setStep(1);
-        updateLoading('🧠 AI 正在分析经历...', `共 ${selected.size} 道题`);
+        updateLoading('🔍 正在解析经历要素...', '分析 who/what/when/where/how');
 
         try {
             const { data: { session } } = await sbClient.auth.getSession();
@@ -841,6 +960,22 @@
             if (!token) { showError('登录已过期，请重新登录'); return; }
 
             const selectedTopics = Array.from(selected).map(i => TOPICS[i]);
+
+            // ===== 【新增】要素解析阶段 =====
+            const elements = await parseExperience(token, exp);
+            let finalExp = exp;
+
+            if (elements) {
+                const missingKeys = Object.keys(elements).filter(k => elements[k] === null);
+                // 只要有要素缺失就显示补全表单
+                if (missingKeys.length > 0) {
+                    finalExp = await showSupplementForm(exp, elements);
+                    // 用户操作完表单后，恢复 loading UI 继续生成
+                    restoreLoadingUI();
+                }
+            }
+            // 如果解析失败（elements === null），直接用原始 experience 继续
+            // ===== 【新增结束】 =====
 
             setStep(2);
             updateLoading('🔗 正在匹配分组并生成脚本...', `共 ${selectedTopics.length} 道题`);
@@ -851,7 +986,7 @@
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ experience: exp, topics: selectedTopics })
+                body: JSON.stringify({ experience: finalExp, topics: selectedTopics })
             });
 
             // 安全解析 JSON（防止非 JSON 响应导致崩溃）
