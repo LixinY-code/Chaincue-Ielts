@@ -449,10 +449,31 @@
     }
 
     // ========================================
-    // 2026年5-8月 Part 2 题库（43道）
+    // 2026年5-8月 Part 2 题库（63道）
     // 分类规则：person=描述人物/关系，event=经历/活动/建议，object=物品/书/故事/App，place=地点/场所
     // ========================================
     let TOPICS = [
+        // ── 2026年5-8月 新增 19 题 ──
+        { cn: "重要决定", en: "Describe an important decision that you made", category: "event", isNew: true },
+        { cn: "电子产品故障", en: "Describe a problem with technology you have encountered, like a computer or a cell phone", category: "object", isNew: true },
+        { cn: "当地新闻", en: "Describe a piece of local news that people are interested in", category: "object", isNew: true },
+        { cn: "名人广告", en: "Describe a piece of advertisement which is about a famous person", category: "object", isNew: true },
+        { cn: "看过的现场比赛", en: "Describe a live sport match you have ever watched", category: "event", isNew: true },
+        { cn: "特殊场合下吃的食物", en: "Describe a kind of food that you ate at special occasions", category: "object", isNew: true },
+        { cn: "长期追求", en: "Describe an ambition you have had for a long time", category: "event", isNew: true },
+        { cn: "在团队中工作", en: "Describe a time when you worked in a group", category: "event", isNew: true },
+        { cn: "近期改变的计划", en: "Describe a plan that you had to change recently", category: "event", isNew: true },
+        { cn: "拥有成功事业的人", en: "Describe a person you know who has a successful business", category: "person", isNew: true },
+        { cn: "医疗行业职业选择的人", en: "Describe a person you know who would like to choose a career in the medical field (e.g. a doctor, a nurse)", category: "person", isNew: true },
+        { cn: "想颁布的新法律", en: "Describe a new law you would like to introduce", category: "object", isNew: true },
+        { cn: "喜欢在家/花园种菜的人", en: "Describe a person who loves to grow vegetables at home or in the garden", category: "person", isNew: true },
+        { cn: "去过的最喜欢的城市", en: "Describe your favorite city that you have visited", category: "place", isNew: true },
+        { cn: "发小", en: "Describe a friend from your childhood", category: "person", isNew: true },
+        { cn: "无聊的地方", en: "Describe a boring place", category: "place", isNew: true },
+        { cn: "早起经历", en: "Describe a time when you got up early", category: "event", isNew: true },
+        { cn: "有趣视频", en: "Describe an interesting video", category: "object", isNew: true },
+        { cn: "喜欢或不喜欢的高建筑", en: "Describe a tall building you like or dislike", category: "place", isNew: true },
+        // ── 原有 44 题 ──
         { cn: "完美工作", en: "Describe your perfect job", category: "event", isNew: false },
         { cn: "想见的名人", en: "Describe a famous person you would like to meet", category: "person", isNew: false },
         { cn: "禁用手机的场合", en: "Describe an occasion when you were not allowed to use your mobile phone", category: "event", isNew: false },
@@ -495,27 +516,7 @@
         { cn: "自然之地", en: "Describe a natural place (parks, mountains, etc.)", category: "place", isNew: false },
         { cn: "让你失望的电影", en: "Describe a movie you watched that you felt disappointed about", category: "object", isNew: false },
         { cn: "生活中离不开的东西", en: "Describe something that you can't live without (not a computer/phone)", category: "object", isNew: false },
-        { cn: "家里放松的地方", en: "Describe your favorite place in your house where you can relax", category: "place", isNew: false },
-        // ── 2026年5-8月 新增 19 题 ──
-        { cn: "重要决定", en: "Describe an important decision that you made", category: "event", isNew: true },
-        { cn: "电子产品故障", en: "Describe a problem with technology you have encountered, like a computer or a cell phone", category: "object", isNew: true },
-        { cn: "当地新闻", en: "Describe a piece of local news that people are interested in", category: "object", isNew: true },
-        { cn: "名人广告", en: "Describe a piece of advertisement which is about a famous person", category: "object", isNew: true },
-        { cn: "看过的现场比赛", en: "Describe a live sport match you have ever watched", category: "event", isNew: true },
-        { cn: "特殊场合下吃的食物", en: "Describe a kind of food that you ate at special occasions", category: "object", isNew: true },
-        { cn: "长期追求", en: "Describe an ambition you have had for a long time", category: "event", isNew: true },
-        { cn: "在团队中工作", en: "Describe a time when you worked in a group", category: "event", isNew: true },
-        { cn: "近期改变的计划", en: "Describe a plan that you had to change recently", category: "event", isNew: true },
-        { cn: "拥有成功事业的人", en: "Describe a person you know who has a successful business", category: "person", isNew: true },
-        { cn: "医疗行业职业选择的人", en: "Describe a person you know who would like to choose a career in the medical field (e.g. a doctor, a nurse)", category: "person", isNew: true },
-        { cn: "想颁布的新法律", en: "Describe a new law you would like to introduce", category: "object", isNew: true },
-        { cn: "喜欢在家/花园种菜的人", en: "Describe a person who loves to grow vegetables at home or in the garden", category: "person", isNew: true },
-        { cn: "去过的最喜欢的城市", en: "Describe your favorite city that you have visited", category: "place", isNew: true },
-        { cn: "发小", en: "Describe a friend from your childhood", category: "person", isNew: true },
-        { cn: "无聊的地方", en: "Describe a boring place", category: "place", isNew: true },
-        { cn: "早起经历", en: "Describe a time when you got up early", category: "event", isNew: true },
-        { cn: "有趣视频", en: "Describe an interesting video", category: "object", isNew: true },
-        { cn: "喜欢或不喜欢的高建筑", en: "Describe a tall building you like or dislike", category: "place", isNew: true }
+        { cn: "家里放松的地方", en: "Describe your favorite place in your house where you can relax", category: "place", isNew: false }
     ];
 
     let selected = new Set();
@@ -718,10 +719,6 @@
 
     function selectAll() {
         selected = new Set(TOPICS.map((_, i) => i));
-        if (selected.size > 10) {
-            // 保留前 10 个
-            selected = new Set([...selected].slice(0, 10));
-        }
         document.querySelectorAll('.topic-check').forEach(c => c.checked = selected.has(parseInt(c.value)));
         document.querySelectorAll('.topic-tag').forEach(l => {
             l.classList.toggle('active', selected.has(parseInt(l.dataset.i)));
@@ -740,11 +737,6 @@
         const cb = document.querySelector(`.topic-check[value="${i}"]`);
         const label = document.querySelector(`.topic-tag[data-i="${i}"]`);
         if (cb.checked) {
-            if (selected.size >= 10) {
-                cb.checked = false;
-                showToast('最多选择 10 道题目', 'info');
-                return;
-            }
             selected.add(i); label.classList.add('active');
         } else { selected.delete(i); label.classList.remove('active'); }
         updateCount();
@@ -956,7 +948,6 @@
         if (sbClient && !currentUser) { showToast('请先登录 / 注册，完全免费', 'info'); openAuthModal(); return; }
         if (!exp) { showToast('请先输入你的真实经历', 'info'); document.getElementById('experienceInput').focus(); return; }
         if (selected.size === 0) { showToast('请至少选择一道题目', 'info'); return; }
-        if (selected.size > 10) { showToast('最多选择 10 道题目，请取消部分选择', 'info'); return; }
 
         if (!SUPABASE_CONFIGURED) {
             showError('请先配置 Supabase（参考 README.md）或将 index.html 替换为桌面上的单页版使用');

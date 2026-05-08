@@ -14,8 +14,8 @@ ${experience}
 ${topicList}
 
 ## Task:
-1. Analyze the user's experience and split it into 1-3 core events/stories
-2. Match each event to topics that can share the SAME story (2-5 topics per group)
+1. Analyze the user's experience and split it into 1-5 core events/stories
+2. Match each event to topics that can share the SAME story (2-10 topics per group, MAX 10 topics per group)
 3. Topics that DON'T fit any shared group should be listed as "solo" topics (one topic per group)
 4. For each matched topic, write a SHORT reason (20-40 words) explaining the connection
 
@@ -40,7 +40,8 @@ ${topicList}
 }
 
 ## Rules:
-- Group topics sharing the SAME core story together (type: "shared")
+- Group topics sharing the SAME core story together (type: "shared"), MAX 10 topics per group
+- If a shared group would exceed 10 topics, split it into multiple groups
 - Topics that can't share should be solo (type: "solo", 1 topic each)
 - Every topic from the list MUST appear in exactly one group
 - Return valid JSON only, nothing else`;
