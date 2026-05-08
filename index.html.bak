@@ -453,49 +453,69 @@
     // 分类规则：person=描述人物/关系，event=经历/活动/建议，object=物品/书/故事/App，place=地点/场所
     // ========================================
     let TOPICS = [
-        { cn: "完美工作", en: "Describe your perfect job", category: "event" },
-        { cn: "想见的名人", en: "Describe a famous person you would like to meet", category: "person" },
-        { cn: "禁用手机的场合", en: "Describe an occasion when you were not allowed to use your mobile phone", category: "event" },
-        { cn: "给别人建议", en: "Describe a time when you gave advice to others", category: "event" },
-        { cn: "外国短期停留", en: "Describe a foreign country you would like to stay or work for a short period", category: "place" },
-        { cn: "想拥有的科技产品", en: "Describe a piece of technology (not a phone) that you would like to own", category: "object" },
-        { cn: "常做计划的人", en: "Describe a person who makes plans a lot", category: "person" },
-        { cn: "喜欢画画的朋友", en: "Describe a friend of yours who loves drawing/painting", category: "person" },
-        { cn: "App/程序", en: "Describe a program or app on your computer or phone", category: "object" },
-        { cn: "最近读过的故事", en: "Describe a story you have read recently", category: "object" },
-        { cn: "微笑的场合", en: "Describe an occasion when many people were smiling", category: "event" },
-        { cn: "为家人骄傲", en: "Describe a time when you felt proud of a family member", category: "person" },
-        { cn: "对家庭重要的东西", en: "Describe something important that has been kept in your family for a long time", category: "object" },
-        { cn: "商城", en: "Describe a shopping mall you know well", category: "place" },
-        { cn: "想了解的野生动物", en: "Describe a wild animal that you want to learn more about", category: "object" },
-        { cn: "擅长音乐的朋友", en: "Describe a friend of yours who is good at music/singing", category: "person" },
-        { cn: "重要的好朋友", en: "Describe a good friend who is important to you", category: "person" },
-        { cn: "迷路", en: "Describe an occasion when you lost your way", category: "event" },
-        { cn: "家族企业工作的人", en: "Describe a person you know who enjoys working for a family business", category: "person" },
-        { cn: "想提升的天赋", en: "Describe a natural talent (sports, music, etc.) you want to improve", category: "event" },
-        { cn: "和亲友享受的晚餐", en: "Describe a great dinner you enjoyed with friends or family", category: "event" },
-        { cn: "想再去一次的远行", en: "Describe a long journey you had and would like to take again", category: "event" },
-        { cn: "传统故事", en: "Describe an interesting traditional story", category: "object" },
-        { cn: "突然停电", en: "Describe a time when the electricity suddenly went off", category: "event" },
-        { cn: "别人向你道歉", en: "Describe a time when someone apologized to you", category: "event" },
-        { cn: "学习朋友好习惯", en: "Describe a good habit your friend has and you want to develop", category: "person" },
-        { cn: "第一次尝试的兴奋活动", en: "Describe an exciting activity you have tried for the first time", category: "event" },
-        { cn: "钦佩的有创造力的人", en: "Describe a creative person (artist, musician, architect, etc.) you admire", category: "person" },
-        { cn: "家中重要老物件", en: "Describe an important old thing that your family has kept", category: "object" },
-        { cn: "第一次用外语", en: "Describe the time when you first talked in a foreign language", category: "event" },
-        { cn: "社交媒体趣事", en: "Describe a time you saw something interesting on social media", category: "event" },
-        { cn: "弄坏东西", en: "Describe a time when you broke something", category: "event" },
-        { cn: "感兴趣的科学学科", en: "Describe an area/subject of science that you are interested in", category: "object" },
-        { cn: "有用的书", en: "Describe a book you read that you found useful", category: "object" },
-        { cn: "钦佩的运动员", en: "Describe a successful sportsperson you admire", category: "person" },
-        { cn: "童年喜欢的玩具", en: "Describe a toy you liked in your childhood", category: "object" },
-        { cn: "别人帮忙下做的决定", en: "Describe an important decision made with the help of others", category: "event" },
-        { cn: "等待特别事情", en: "Describe a time when you waited for something special", category: "event" },
-        { cn: "购物服务", en: "Describe a time when you received good service in a shop", category: "event" },
-        { cn: "自然之地", en: "Describe a natural place (parks, mountains, etc.)", category: "place" },
-        { cn: "让你失望的电影", en: "Describe a movie you watched that you felt disappointed about", category: "object" },
-        { cn: "生活中离不开的东西", en: "Describe something that you can't live without (not a computer/phone)", category: "object" },
-        { cn: "家里放松的地方", en: "Describe your favorite place in your house where you can relax", category: "place" }
+        { cn: "完美工作", en: "Describe your perfect job", category: "event", isNew: false },
+        { cn: "想见的名人", en: "Describe a famous person you would like to meet", category: "person", isNew: false },
+        { cn: "禁用手机的场合", en: "Describe an occasion when you were not allowed to use your mobile phone", category: "event", isNew: false },
+        { cn: "给别人建议", en: "Describe a time when you gave advice to others", category: "event", isNew: false },
+        { cn: "外国短期停留", en: "Describe a foreign country you would like to stay or work for a short period", category: "place", isNew: false },
+        { cn: "想拥有的科技产品", en: "Describe a piece of technology (not a phone) that you would like to own", category: "object", isNew: false },
+        { cn: "常做计划的人", en: "Describe a person who makes plans a lot", category: "person", isNew: false },
+        { cn: "喜欢画画的朋友", en: "Describe a friend of yours who loves drawing/painting", category: "person", isNew: false },
+        { cn: "App/程序", en: "Describe a program or app on your computer or phone", category: "object", isNew: false },
+        { cn: "最近读过的故事", en: "Describe a story you have read recently", category: "object", isNew: false },
+        { cn: "微笑的场合", en: "Describe an occasion when many people were smiling", category: "event", isNew: false },
+        { cn: "为家人骄傲", en: "Describe a time when you felt proud of a family member", category: "person", isNew: false },
+        { cn: "对家庭重要的东西", en: "Describe something important that has been kept in your family for a long time", category: "object", isNew: false },
+        { cn: "商城", en: "Describe a shopping mall you know well", category: "place", isNew: false },
+        { cn: "想了解的野生动物", en: "Describe a wild animal that you want to learn more about", category: "object", isNew: false },
+        { cn: "擅长音乐的朋友", en: "Describe a friend of yours who is good at music/singing", category: "person", isNew: false },
+        { cn: "重要的好朋友", en: "Describe a good friend who is important to you", category: "person", isNew: false },
+        { cn: "迷路", en: "Describe an occasion when you lost your way", category: "event", isNew: false },
+        { cn: "家族企业工作的人", en: "Describe a person you know who enjoys working for a family business", category: "person", isNew: false },
+        { cn: "想提升的天赋", en: "Describe a natural talent (sports, music, etc.) you want to improve", category: "event", isNew: false },
+        { cn: "和亲友享受的晚餐", en: "Describe a great dinner you enjoyed with friends or family", category: "event", isNew: false },
+        { cn: "想再去一次的远行", en: "Describe a long journey you had and would like to take again", category: "event", isNew: false },
+        { cn: "传统故事", en: "Describe an interesting traditional story", category: "object", isNew: false },
+        { cn: "突然停电", en: "Describe a time when the electricity suddenly went off", category: "event", isNew: false },
+        { cn: "别人向你道歉", en: "Describe a time when someone apologized to you", category: "event", isNew: false },
+        { cn: "学习朋友好习惯", en: "Describe a good habit your friend has and you want to develop", category: "person", isNew: false },
+        { cn: "第一次尝试的兴奋活动", en: "Describe an exciting activity you have tried for the first time", category: "event", isNew: false },
+        { cn: "钦佩的有创造力的人", en: "Describe a creative person (artist, musician, architect, etc.) you admire", category: "person", isNew: false },
+        { cn: "家中重要老物件", en: "Describe an important old thing that your family has kept", category: "object", isNew: false },
+        { cn: "第一次用外语", en: "Describe the time when you first talked in a foreign language", category: "event", isNew: false },
+        { cn: "社交媒体趣事", en: "Describe a time you saw something interesting on social media", category: "event", isNew: false },
+        { cn: "弄坏东西", en: "Describe a time when you broke something", category: "event", isNew: false },
+        { cn: "感兴趣的科学学科", en: "Describe an area/subject of science that you are interested in", category: "object", isNew: false },
+        { cn: "有用的书", en: "Describe a book you read that you found useful", category: "object", isNew: false },
+        { cn: "钦佩的运动员", en: "Describe a successful sportsperson you admire", category: "person", isNew: false },
+        { cn: "童年喜欢的玩具", en: "Describe a toy you liked in your childhood", category: "object", isNew: false },
+        { cn: "别人帮忙下做的决定", en: "Describe an important decision made with the help of others", category: "event", isNew: false },
+        { cn: "等待特别事情", en: "Describe a time when you waited for something special", category: "event", isNew: false },
+        { cn: "购物服务", en: "Describe a time when you received good service in a shop", category: "event", isNew: false },
+        { cn: "自然之地", en: "Describe a natural place (parks, mountains, etc.)", category: "place", isNew: false },
+        { cn: "让你失望的电影", en: "Describe a movie you watched that you felt disappointed about", category: "object", isNew: false },
+        { cn: "生活中离不开的东西", en: "Describe something that you can't live without (not a computer/phone)", category: "object", isNew: false },
+        { cn: "家里放松的地方", en: "Describe your favorite place in your house where you can relax", category: "place", isNew: false },
+        // ── 2026年5-8月 新增 19 题 ──
+        { cn: "重要决定", en: "Describe an important decision that you made", category: "event", isNew: true },
+        { cn: "电子产品故障", en: "Describe a problem with technology you have encountered, like a computer or a cell phone", category: "object", isNew: true },
+        { cn: "当地新闻", en: "Describe a piece of local news that people are interested in", category: "object", isNew: true },
+        { cn: "名人广告", en: "Describe a piece of advertisement which is about a famous person", category: "object", isNew: true },
+        { cn: "看过的现场比赛", en: "Describe a live sport match you have ever watched", category: "event", isNew: true },
+        { cn: "特殊场合下吃的食物", en: "Describe a kind of food that you ate at special occasions", category: "object", isNew: true },
+        { cn: "长期追求", en: "Describe an ambition you have had for a long time", category: "event", isNew: true },
+        { cn: "在团队中工作", en: "Describe a time when you worked in a group", category: "event", isNew: true },
+        { cn: "近期改变的计划", en: "Describe a plan that you had to change recently", category: "event", isNew: true },
+        { cn: "拥有成功事业的人", en: "Describe a person you know who has a successful business", category: "person", isNew: true },
+        { cn: "医疗行业职业选择的人", en: "Describe a person you know who would like to choose a career in the medical field (e.g. a doctor, a nurse)", category: "person", isNew: true },
+        { cn: "想颁布的新法律", en: "Describe a new law you would like to introduce", category: "object", isNew: true },
+        { cn: "喜欢在家/花园种菜的人", en: "Describe a person who loves to grow vegetables at home or in the garden", category: "person", isNew: true },
+        { cn: "去过的最喜欢的城市", en: "Describe your favorite city that you have visited", category: "place", isNew: true },
+        { cn: "发小", en: "Describe a friend from your childhood", category: "person", isNew: true },
+        { cn: "无聊的地方", en: "Describe a boring place", category: "place", isNew: true },
+        { cn: "早起经历", en: "Describe a time when you got up early", category: "event", isNew: true },
+        { cn: "有趣视频", en: "Describe an interesting video", category: "object", isNew: true },
+        { cn: "喜欢或不喜欢的高建筑", en: "Describe a tall building you like or dislike", category: "place", isNew: true }
     ];
 
     let selected = new Set();
@@ -677,7 +697,7 @@
             <label class="topic-tag flex items-start gap-1.5 p-2 rounded-xl border border-gray-200 select-none ${isChecked ? 'active' : ''}" data-i="${i}">
                 <input type="checkbox" class="topic-check mt-0.5 flex-shrink-0" value="${i}" ${isChecked ? 'checked' : ''} onchange="toggleTopic(${i})">
                 <div class="min-w-0">
-                    <div class="text-xs font-medium text-gray-700 leading-snug">${t.cn}</div>
+                    <div class="text-xs font-medium text-gray-700 leading-snug">${t.cn}${t.isNew ? ' <span style="color:#16a34a;font-size:0.65rem;vertical-align:middle">🆕</span>' : ''}</div>
                     <div class="text-xs text-gray-400 leading-snug truncate">${t.en}</div>
                 </div>
             </label>`;
@@ -698,8 +718,14 @@
 
     function selectAll() {
         selected = new Set(TOPICS.map((_, i) => i));
-        document.querySelectorAll('.topic-check').forEach(c => c.checked = true);
-        document.querySelectorAll('.topic-tag').forEach(l => l.classList.add('active'));
+        if (selected.size > 10) {
+            // 保留前 10 个
+            selected = new Set([...selected].slice(0, 10));
+        }
+        document.querySelectorAll('.topic-check').forEach(c => c.checked = selected.has(parseInt(c.value)));
+        document.querySelectorAll('.topic-tag').forEach(l => {
+            l.classList.toggle('active', selected.has(parseInt(l.dataset.i)));
+        });
         updateCount();
     }
 
@@ -713,8 +739,14 @@
     function toggleTopic(i) {
         const cb = document.querySelector(`.topic-check[value="${i}"]`);
         const label = document.querySelector(`.topic-tag[data-i="${i}"]`);
-        if (cb.checked) { selected.add(i); label.classList.add('active'); }
-        else { selected.delete(i); label.classList.remove('active'); }
+        if (cb.checked) {
+            if (selected.size >= 10) {
+                cb.checked = false;
+                showToast('最多选择 10 道题目', 'info');
+                return;
+            }
+            selected.add(i); label.classList.add('active');
+        } else { selected.delete(i); label.classList.remove('active'); }
         updateCount();
     }
 
@@ -725,7 +757,7 @@
         document.getElementById('totalCount').textContent = total;
         document.getElementById('selectionBar').style.width = total > 0 ? (sel / total * 100) + '%' : '0%';
         const warning = document.getElementById('topicWarning');
-        if (sel > 12) { document.getElementById('warningCount').textContent = sel; warning.classList.remove('hidden'); }
+        if (sel > 10) { document.getElementById('warningCount').textContent = sel; warning.classList.remove('hidden'); }
         else { warning.classList.add('hidden'); }
         checkBtn();
     }
@@ -924,6 +956,7 @@
         if (sbClient && !currentUser) { showToast('请先登录 / 注册，完全免费', 'info'); openAuthModal(); return; }
         if (!exp) { showToast('请先输入你的真实经历', 'info'); document.getElementById('experienceInput').focus(); return; }
         if (selected.size === 0) { showToast('请至少选择一道题目', 'info'); return; }
+        if (selected.size > 10) { showToast('最多选择 10 道题目，请取消部分选择', 'info'); return; }
 
         if (!SUPABASE_CONFIGURED) {
             showError('请先配置 Supabase（参考 README.md）或将 index.html 替换为桌面上的单页版使用');
@@ -992,16 +1025,17 @@
             }
 
             results = data.groups;
-            lastHistoryId = null; // 由后端自动保存
+            lastHistoryId = null;
 
-            // 构建总览
+            // 构建总览：检查每个 topic 是否有有效内容
             const covered = new Set();
             const missed = new Set(selected);
             results.forEach(g => {
                 g.topics.forEach(t => {
-                    const isChained = t.shared_body && t.shared_body.length > 50;
-                    const hasFallback = t.script && !t.script.startsWith('[生成失败]') && t.script.length > 50;
-                    if (isChained || hasFallback) {
+                    const hasContent = (t.full_script && t.full_script.length > 50) ||
+                        (t.shared_body && t.shared_body.length > 50) ||
+                        (t.opening && t.opening.length > 20);
+                    if (hasContent) {
                         const idx = TOPICS.findIndex(x => x.cn === t.cn);
                         if (idx !== -1) covered.add(idx);
                     }
@@ -1210,20 +1244,22 @@
         const section = document.getElementById('resultsSection');
         const list = document.getElementById('resultsList');
         list.innerHTML = results.map((group, gi) => {
-            const hasSharedBody = group.topics.some(t => t.shared_body);
-            const sharedBody = group.topics.find(t => t.shared_body)?.shared_body || '';
-            if (hasSharedBody && sharedBody) return renderChainGroup(group, gi, sharedBody);
-            else return renderFallbackGroup(group, gi);
+            if (group.shared_body) {
+                return renderSharedGroup(group, gi);
+            } else {
+                return renderSoloGroup(group, gi);
+            }
         }).join('');
         section.classList.remove('hidden');
     }
 
-    function renderChainGroup(group, gi, sharedBody) {
-        const chainedTopics = group.topics.filter(t => t.shared_body);
-        const topicTags = chainedTopics.map(t => `<span class="stat-done text-xs px-2 py-0.5 rounded-full">${t.cn}</span>`).join('');
+    // 共享组渲染（有 shared_body）
+    function renderSharedGroup(group, gi) {
+        const sharedBody = group.shared_body;
         const sharedWc = sharedBody.split(/\s+/).filter(Boolean).length;
+        const topicTags = group.topics.map(t => `<span class="stat-done text-xs px-2 py-0.5 rounded-full">${t.cn}</span>`).join('');
 
-        const topicCards = chainedTopics.map((topic, ti) => {
+        const topicCards = group.topics.map((topic, ti) => {
             const fullScript = [topic.opening, sharedBody, topic.enhancement, topic.ending].filter(Boolean).join('\n\n');
             const fullWc = fullScript.split(/\s+/).filter(Boolean).length;
             const openWc = topic.opening ? topic.opening.split(/\s+/).filter(Boolean).length : 0;
@@ -1238,9 +1274,9 @@
                             <p class="text-xs text-gray-400 italic mt-0.5">${topic.en}</p>
                         </div>
                         <div class="flex gap-1.5 flex-shrink-0">
-                            <button onclick="speakFullScript(${gi}, ${chainedTopics.indexOf(topic)}, this)"
+                            <button onclick="speakFullScript(${gi}, ${ti}, this)"
                                 class="btn-action speak-btn text-xs px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 font-medium" title="朗读">🔊 朗读</button>
-                            <button onclick="copyFullScript(${gi}, ${chainedTopics.indexOf(topic)})"
+                            <button onclick="copyFullScript(${gi}, ${ti})"
                                 class="btn-action text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 font-medium">📋 复制</button>
                         </div>
                     </div>
@@ -1255,8 +1291,8 @@
                                 ${[1,2,3,4,5].map(s => `<span class="star" onclick="rateStar(${gi},${ti},${s})" onmouseenter="hoverStar(${gi},${ti},${s})" onmouseleave="unhoverStar(${gi},${ti})">★</span>`).join('')}
                             </div>
                         </div>
-                        <span class="text-xs ${fullWc >= 250 ? 'text-green-600' : fullWc >= 200 ? 'text-amber-500' : 'text-red-500'} font-medium">
-                            全稿 ≈ ${fullWc} 词 ${fullWc < 250 ? '⚠️' : '✓'}
+                        <span class="text-xs ${fullWc >= 220 ? 'text-green-600' : fullWc >= 180 ? 'text-amber-500' : 'text-red-500'} font-medium">
+                            全稿 ≈ ${fullWc} 词 ${fullWc >= 220 ? '✓' : '⚠️'}
                         </span>
                     </div>
                 </div>`;
@@ -1269,7 +1305,7 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1.5">
                                 <span class="text-xs font-bold text-white bg-gradient-to-r from-violet-500 to-purple-500 px-2.5 py-0.5 rounded-full shadow-sm">事例 ${gi + 1}</span>
-                                <span class="text-xs text-violet-600 font-medium bg-violet-50 px-2 py-0.5 rounded-full">🔗 串 ${chainedTopics.length} 题</span>
+                                <span class="text-xs text-violet-600 font-medium bg-violet-50 px-2 py-0.5 rounded-full">🔗 串 ${group.topics.length} 题</span>
                             </div>
                             <p class="text-sm font-semibold text-gray-800 leading-snug">${group.summary}</p>
                         </div>
@@ -1294,13 +1330,14 @@
             </div>`;
     }
 
-    function renderFallbackGroup(group, gi) {
+    // 独立组渲染（有 full_script，无 shared_body）
+    function renderSoloGroup(group, gi) {
         return `
             <div class="story-card card rounded-2xl overflow-hidden shadow-sm fade-up" style="animation-delay:${gi * 0.08}s">
                 <div class="px-5 pt-5 pb-3 cursor-pointer" onclick="toggleGroup(${gi})">
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex-1 min-w-0">
-                            <span class="text-xs font-bold text-white bg-gradient-to-r from-gray-400 to-gray-500 px-2.5 py-0.5 rounded-full shadow-sm">兜底</span>
+                            <span class="text-xs font-bold text-white bg-gradient-to-r from-blue-400 to-blue-500 px-2.5 py-0.5 rounded-full shadow-sm">独立稿</span>
                             <p class="text-sm font-semibold text-gray-800 leading-snug mt-1.5">${group.summary}</p>
                         </div>
                         <svg class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300 chevron-${gi}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -1308,7 +1345,9 @@
                 </div>
                 <div id="group-body-${gi}" class="dropdown-content px-5 pb-5">
                     <div class="space-y-3">
-                        ${group.topics.map((topic, ti) => `
+                        ${group.topics.map((topic, ti) => {
+                            const wc = topic.full_script ? topic.full_script.split(/\s+/).filter(Boolean).length : 0;
+                            return `
                             <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
                                 <div class="flex items-start justify-between gap-2 mb-2">
                                     <div class="min-w-0">
@@ -1316,13 +1355,24 @@
                                         <p class="text-xs text-gray-400 italic mt-0.5">${topic.en}</p>
                                     </div>
                                     <div class="flex gap-1.5 flex-shrink-0">
-                                        <button onclick="speakFallbackScript(${gi}, ${ti}, this)" class="btn-action speak-btn text-xs px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 font-medium">🔊 朗读</button>
-                                        <button onclick="copyFallbackScript(${gi}, ${ti})" class="btn-action text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 font-medium">📋 复制</button>
+                                        <button onclick="speakSoloScript(${gi}, ${ti}, this)" class="btn-action speak-btn text-xs px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 font-medium">🔊 朗读</button>
+                                        <button onclick="copySoloScript(${gi}, ${ti})" class="btn-action text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 font-medium">📋 复制</button>
                                     </div>
                                 </div>
-                                <div class="script-body py-2"><p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">${topic.script || '(生成失败)'}</p></div>
-                            </div>
-                        `).join('')}
+                                <div class="script-body py-2"><p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">${topic.full_script || '(生成失败)'}</p></div>
+                                <div class="mt-2 pt-2 border-t border-gray-50 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-gray-400">难度自评：</span>
+                                        <div class="star-rating flex gap-0.5" id="stars-${gi}-${ti}">
+                                            ${[1,2,3,4,5].map(s => `<span class="star" onclick="rateStar(${gi},${ti},${s})" onmouseenter="hoverStar(${gi},${ti},${s})" onmouseleave="unhoverStar(${gi},${ti})">★</span>`).join('')}
+                                        </div>
+                                    </div>
+                                    <span class="text-xs ${wc >= 220 ? 'text-green-600' : wc >= 180 ? 'text-amber-500' : 'text-red-500'} font-medium">
+                                        ≈ ${wc} 词 ${wc >= 220 ? '✓' : wc >= 180 ? '~' : '⚠️'}
+                                    </span>
+                                </div>
+                            </div>`;
+                        }).join('')}
                     </div>
                 </div>
             </div>`;
@@ -1336,10 +1386,14 @@
     function getFullScript(gi, ti) {
         const group = results[gi];
         if (!group) return '';
-        const chained = group.topics.filter(t => t.shared_body);
-        const topic = chained[ti];
+        const topic = group.topics[ti];
         if (!topic) return '';
-        return [topic.opening, topic.shared_body, topic.enhancement, topic.ending].filter(Boolean).join('\n\n');
+        // 共享组：拼接 opening + shared_body + enhancement + ending
+        if (topic.shared_body) {
+            return [topic.opening, topic.shared_body, topic.enhancement, topic.ending].filter(Boolean).join('\n\n');
+        }
+        // 独立组：直接返回 full_script
+        return topic.full_script || '';
     }
 
     function copyFullScript(gi, ti) {
@@ -1349,20 +1403,15 @@
     }
 
     function copySharedBody(gi) {
-        const body = results[gi]?.topics?.find(t => t.shared_body)?.shared_body || '';
+        const body = results[gi]?.shared_body || '';
         if (!body) return;
         navigator.clipboard.writeText(body).then(() => showToast('共享主体段已复制 ✓', 'success')).catch(() => showToast('复制失败', 'error'));
     }
 
     function speakFullScript(gi, ti, btn) { const s = getFullScript(gi, ti); if (s) _speak(s, btn); }
 
-    function copyFallbackScript(gi, ti) {
-        const s = results[gi]?.topics[ti]?.script;
-        if (!s) return;
-        navigator.clipboard.writeText(s).then(() => showToast('已复制 ✓', 'success')).catch(() => showToast('复制失败', 'error'));
-    }
-
-    function speakFallbackScript(gi, ti, btn) { const s = results[gi]?.topics[ti]?.script; if (s) _speak(s, btn); }
+    function copySoloScript(gi, ti) { copyFullScript(gi, ti); }
+    function speakSoloScript(gi, ti, btn) { speakFullScript(gi, ti, btn); }
 
     function _speak(script, btn) {
         if (currentUtterance && speechSynthesis.speaking) {
