@@ -24,14 +24,14 @@ ${topicList}
   "groups": [
     {
       "type": "shared",
-      "event_summary": "One Chinese sentence summarizing this story",
+      "event_summary": "One English sentence summarizing this story",
       "topics": [
         { "cn": "...", "en": "...", "short_reason": "..." }
       ]
     },
     {
       "type": "solo",
-      "event_summary": "Which part of the experience fits this topic",
+      "event_summary": "One English sentence explaining which part of the experience fits this topic",
       "topics": [
         { "cn": "...", "en": "...", "short_reason": "..." }
       ]
@@ -69,7 +69,7 @@ ${topicList}
 
 Produce ONE shared main body paragraph (100-150 words), then for EACH topic provide:
 - opening (40-50 words): casual, unique per topic
-- enhancement (40-50 words): tweak the angle for this topic, include a Chinese 侧重点 note
+- enhancement (40-50 words): tweak the angle for this topic, include an English note on the key emphasis
 - ending (40-50 words): casual reflection, unique per topic
 
 Each topic's full script = opening + shared_body + enhancement + ending ≈ 220-290 words.
@@ -84,7 +84,7 @@ Each topic's full script = opening + shared_body + enhancement + ending ≈ 220-
 
 ### Per-Topic Parts:
 - **Opening**: Start casual, NOT "The topic I want to talk about is..."
-- **Enhancement**: NEW content bridging shared story to THIS topic. Include enhancement_note in Chinese.
+- **Enhancement**: NEW content bridging shared story to THIS topic. Include a short English enhancement_note on what to emphasize.
 - **Ending**: Casual reflection, NOT "In conclusion"
 
 ## Output format (JSON ONLY):
@@ -95,13 +95,13 @@ Each topic's full script = opening + shared_body + enhancement + ending ≈ 220-
       "cn": "Chinese topic name (exact match)",
       "opening": "...",
       "enhancement": "...",
-      "enhancement_note": "侧重点说明（中文）",
+      "enhancement_note": "Short note in English on what to emphasize for this topic",
       "ending": "..."
     }
   ]
 }
 
-EVERY topic MUST be included. Do NOT skip any.
+EVERY topic MUST be included. Do NOT skip any. Every section (opening, enhancement, ending) must be COMPLETE — do NOT truncate or abbreviate.
 Return JSON only. No explanations. No markdown fences.`;
 }
 
@@ -129,6 +129,8 @@ Structure:
 - Ending (~40 words): Casual reflection — NOT "In conclusion"
 
 ⚠️ WORD COUNT: 180-250 words. Under 180 words will be REJECTED.
+
+⚠️ IMPORTANT: Write the COMPLETE script. Do NOT truncate, abbreviate, or leave any section unfinished. Every sentence must be fully written out.
 
 Write only the script in English. No JSON. No explanations.`;
 }
@@ -275,7 +277,7 @@ async function generateSharedGroup(experience, group) {
 async function generateSoloGroup(experience, topic) {
   try {
     const prompt = buildSoloPrompt(experience, topic);
-    const script = await callAI(prompt, { temperature: 0.2, max_tokens: 1000 });
+    const script = await callAI(prompt, { temperature: 0.2, max_tokens: 1500 });
 
     if (script && script.length > 80) {
       return {
@@ -310,7 +312,7 @@ async function generateFallback(experience, topics) {
   return Promise.all(topics.map(async topic => {
     try {
       const prompt = buildSoloPrompt(experience, topic);
-      const script = await callAI(prompt, { temperature: 0.2, max_tokens: 1000 });
+      const script = await callAI(prompt, { temperature: 0.2, max_tokens: 1500 });
       if (script && script.length > 80) {
         return { summary: topic.cn, shared_body: null, topics: [{ cn: topic.cn, en: topic.en, reason: '从你的经历出发', full_script: script }] };
       }
