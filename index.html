@@ -1024,7 +1024,7 @@
             results.forEach(g => {
                 g.topics.forEach(t => {
                     const hasContent = (t.full_script && t.full_script.length > 50) ||
-                        (t.shared_body && t.shared_body.length > 50) ||
+                        (t.skeleton && t.skeleton.intro) ||
                         (t.opening && t.opening.length > 20);
                     if (hasContent) {
                         const idx = TOPICS.findIndex(x => x.cn === t.cn);
@@ -1235,27 +1235,30 @@
         const section = document.getElementById('resultsSection');
         const list = document.getElementById('resultsList');
         list.innerHTML = results.map((group, gi) => {
-            if (group.shared_body) {
-                return renderSharedGroup(group, gi);
-            } else {
-                return renderSoloGroup(group, gi);
-            }
+            const hasSkeleton = group.topics.some(t => t.skeleton);
+            if (hasSkeleton) return renderTimelineGroup(group, gi);
+            else return renderFallbackGroup(group, gi);
         }).join('');
         section.classList.remove('hidden');
     }
 
-    // 共享组渲染（有 shared_body）
-    function renderSharedGroup(group, gi) {
-        const sharedBody = group.shared_body;
-        const sharedWc = sharedBody.split(/\s+/).filter(Boolean).length;
-        const topicTags = group.topics.map(t => `<span class="stat-done text-xs px-2 py-0.5 rounded-full">${t.cn}</span>`).join('');
+    function renderTimelineGroup(group, gi) {
+        const skeletonTopics = group.topics.filter(t => t.skeleton);
+        const skeleton = skeletonTopics[0]?.skeleton;
+        if (!skeleton) return renderFallbackGroup(group, gi);
 
-        const topicCards = group.topics.map((topic, ti) => {
-            const fullScript = [topic.opening, sharedBody, topic.enhancement, topic.ending].filter(Boolean).join('\n\n');
+        const topicTags = skeletonTopics.map(t => `<span class="stat-done text-xs px-2 py-0.5 rounded-full">${t.cn}</span>`).join('');
+
+        const allParts = [skeleton.intro, skeleton.past?.description, skeleton.past?.feeling,
+            skeleton.present?.description, skeleton.present?.feeling,
+            skeleton.future?.description, skeleton.future?.feeling, skeleton.outro].filter(Boolean);
+        const skeletonWc = allParts.join(' ').split(/\s+/).filter(Boolean).length;
+
+        const topicCards = skeletonTopics.map((topic, ti) => {
+            const fullScript = [skeleton.intro, skeleton.past?.description, skeleton.past?.feeling,
+                skeleton.present?.description, skeleton.present?.feeling,
+                skeleton.future?.description, skeleton.future?.feeling, skeleton.outro, topic.angle_tweak].filter(Boolean).join('\n\n');
             const fullWc = fullScript.split(/\s+/).filter(Boolean).length;
-            const openWc = topic.opening ? topic.opening.split(/\s+/).filter(Boolean).length : 0;
-            const enhWc = topic.enhancement ? topic.enhancement.split(/\s+/).filter(Boolean).length : 0;
-            const endWc = topic.ending ? topic.ending.split(/\s+/).filter(Boolean).length : 0;
 
             return `
                 <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow">
@@ -1265,16 +1268,16 @@
                             <p class="text-xs text-gray-400 italic mt-0.5">${topic.en}</p>
                         </div>
                         <div class="flex gap-1.5 flex-shrink-0">
-                            <button onclick="speakFullScript(${gi}, ${ti}, this)"
+                            <button onclick="speakTimelineScript(${gi}, ${ti}, this)"
                                 class="btn-action speak-btn text-xs px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 font-medium" title="朗读">🔊 朗读</button>
-                            <button onclick="copyFullScript(${gi}, ${ti})"
+                            <button onclick="copyTimelineScript(${gi}, ${ti})"
                                 class="btn-action text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 font-medium">📋 复制</button>
                         </div>
                     </div>
                     <p class="text-xs text-blue-600 mb-3 leading-relaxed">💡 串题思路：${topic.reason}</p>
-                    ${topic.opening ? `<div class="mb-2.5"><div class="flex items-center gap-1.5 mb-1"><span class="text-xs font-bold text-violet-700 bg-violet-100 px-2 py-0.5 rounded">开头</span><span class="text-xs text-gray-400">${openWc} 词</span></div><div class="script-body py-1.5 pl-3.5 border-l-2 border-violet-300"><p class="text-sm text-gray-700 leading-relaxed">${topic.opening}</p></div></div>` : ''}
-                    ${topic.enhancement ? `<div class="mb-2.5"><div class="flex items-center gap-1.5 mb-1"><span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">强化段</span><span class="text-xs text-gray-400">${enhWc} 词</span></div>${topic.enhancement_note ? `<p class="text-xs text-amber-600 mb-1 leading-relaxed">👉 讲的时候强调：${topic.enhancement_note}</p>` : ''}<div class="script-body py-1.5 pl-3.5 border-l-2 border-amber-300"><p class="text-sm text-gray-700 leading-relaxed">${topic.enhancement}</p></div></div>` : ''}
-                    ${topic.ending ? `<div class="mb-2.5"><div class="flex items-center gap-1.5 mb-1"><span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded">结尾</span><span class="text-xs text-gray-400">${endWc} 词</span></div><div class="script-body py-1.5 pl-3.5 border-l-2 border-green-300"><p class="text-sm text-gray-700 leading-relaxed">${topic.ending}</p></div></div>` : ''}
+                    ${topic.angle_intro_note ? `<div class="mb-2"><div class="flex items-center gap-1.5 mb-1"><span class="text-xs font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">开头侧重</span></div><p class="text-xs text-indigo-600 leading-relaxed">👉 ${topic.angle_intro_note}</p></div>` : ''}
+                    ${topic.angle_tweak ? `<div class="mb-2"><div class="flex items-center gap-1.5 mb-1"><span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">角度微调</span><span class="text-xs text-gray-400">${topic.angle_tweak.split(/\s+/).filter(Boolean).length} 词</span></div><div class="script-body py-1.5 pl-3.5 border-l-2 border-amber-300"><p class="text-sm text-gray-700 leading-relaxed">${topic.angle_tweak}</p></div></div>` : ''}
+                    ${topic.angle_outro_note ? `<div class="mb-2"><div class="flex items-center gap-1.5 mb-1"><span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded">结尾侧重</span></div><p class="text-xs text-green-600 leading-relaxed">👉 ${topic.angle_outro_note}</p></div>` : ''}
                     <div class="mt-2 pt-2 border-t border-gray-50 flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-gray-400">难度自评：</span>
@@ -1282,12 +1285,99 @@
                                 ${[1,2,3,4,5].map(s => `<span class="star" onclick="rateStar(${gi},${ti},${s})" onmouseenter="hoverStar(${gi},${ti},${s})" onmouseleave="unhoverStar(${gi},${ti})">★</span>`).join('')}
                             </div>
                         </div>
-                        <span class="text-xs ${fullWc >= 220 ? 'text-green-600' : fullWc >= 180 ? 'text-amber-500' : 'text-red-500'} font-medium">
-                            全稿 ≈ ${fullWc} 词 ${fullWc >= 220 ? '✓' : '⚠️'}
+                        <span class="text-xs ${fullWc >= 200 ? 'text-green-600' : fullWc >= 170 ? 'text-amber-500' : 'text-red-500'} font-medium">
+                            全稿 ≈ ${fullWc} 词 ${fullWc < 200 ? '⚠️' : '✓'}
                         </span>
                     </div>
                 </div>`;
         }).join('');
+
+        const introWc = skeleton.intro ? skeleton.intro.split(/\s+/).filter(Boolean).length : 0;
+        const pastDescWc = skeleton.past?.description ? skeleton.past.description.split(/\s+/).filter(Boolean).length : 0;
+        const pastFeelWc = skeleton.past?.feeling ? skeleton.past.feeling.split(/\s+/).filter(Boolean).length : 0;
+        const presDescWc = skeleton.present?.description ? skeleton.present.description.split(/\s+/).filter(Boolean).length : 0;
+        const presFeelWc = skeleton.present?.feeling ? skeleton.present.feeling.split(/\s+/).filter(Boolean).length : 0;
+        const futDescWc = skeleton.future?.description ? skeleton.future.description.split(/\s+/).filter(Boolean).length : 0;
+        const futFeelWc = skeleton.future?.feeling ? skeleton.future.feeling.split(/\s+/).filter(Boolean).length : 0;
+        const outroWc = skeleton.outro ? skeleton.outro.split(/\s+/).filter(Boolean).length : 0;
+
+        const timelineHTML = `
+            ${skeleton.intro ? `
+            <div class="mb-4">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                    <span class="text-xs font-bold text-violet-700 bg-violet-200 px-2 py-0.5 rounded">💬 Intro 开场</span>
+                    <span class="text-xs text-gray-400">${introWc} 词</span>
+                </div>
+                <div class="script-body py-1.5 pl-3.5 border-l-2 border-violet-400"><p class="text-sm text-gray-700 leading-relaxed">${skeleton.intro}</p></div>
+            </div>` : ''}
+
+            <div class="relative ml-4 border-l-2 border-dashed border-violet-200 pl-6 space-y-5">
+
+                <div class="relative">
+                    <div class="absolute -left-[29px] top-0 w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-red-400 border-2 border-white shadow-sm"></div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded">⏪ 过去 Past</span>
+                        <span class="text-xs text-gray-400">${pastDescWc + pastFeelWc} 词</span>
+                    </div>
+                    ${skeleton.past?.description ? `
+                    <div class="mb-2">
+                        <div class="flex items-center gap-1 mb-1"><span class="text-xs font-medium text-orange-600">📝 描述</span><span class="text-xs text-gray-400">${pastDescWc} 词</span></div>
+                        <div class="script-body py-1.5 pl-3.5 border-l-2 border-orange-300"><p class="text-sm text-gray-700 leading-relaxed">${skeleton.past.description}</p></div>
+                    </div>` : ''}
+                    ${skeleton.past?.feeling ? `
+                    <div>
+                        <div class="flex items-center gap-1 mb-1"><span class="text-xs font-medium text-orange-600">💭 感受</span><span class="text-xs text-gray-400">${pastFeelWc} 词</span></div>
+                        <div class="script-body py-1.5 pl-3.5 border-l-2 border-orange-200"><p class="text-sm text-gray-700 leading-relaxed italic">${skeleton.past.feeling}</p></div>
+                    </div>` : ''}
+                </div>
+
+                <div class="relative">
+                    <div class="absolute -left-[29px] top-0 w-4 h-4 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 border-2 border-white shadow-sm"></div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">🎯 现在 Present</span>
+                        <span class="text-xs text-gray-400">${presDescWc + presFeelWc} 词</span>
+                    </div>
+                    ${skeleton.present?.description ? `
+                    <div class="mb-2">
+                        <div class="flex items-center gap-1 mb-1"><span class="text-xs font-medium text-blue-600">📝 描述</span><span class="text-xs text-gray-400">${presDescWc} 词</span></div>
+                        <div class="script-body py-1.5 pl-3.5 border-l-2 border-blue-300"><p class="text-sm text-gray-700 leading-relaxed">${skeleton.present.description}</p></div>
+                    </div>` : ''}
+                    ${skeleton.present?.feeling ? `
+                    <div>
+                        <div class="flex items-center gap-1 mb-1"><span class="text-xs font-medium text-blue-600">💭 感受</span><span class="text-xs text-gray-400">${presFeelWc} 词</span></div>
+                        <div class="script-body py-1.5 pl-3.5 border-l-2 border-blue-200"><p class="text-sm text-gray-700 leading-relaxed italic">${skeleton.present.feeling}</p></div>
+                    </div>` : ''}
+                </div>
+
+                <div class="relative">
+                    <div class="absolute -left-[29px] top-0 w-4 h-4 rounded-full bg-gradient-to-br from-emerald-400 to-green-400 border-2 border-white shadow-sm"></div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">🚀 未来 Future</span>
+                        <span class="text-xs text-gray-400">${futDescWc + futFeelWc} 词</span>
+                    </div>
+                    ${skeleton.future?.description ? `
+                    <div class="mb-2">
+                        <div class="flex items-center gap-1 mb-1"><span class="text-xs font-medium text-emerald-600">📝 描述</span><span class="text-xs text-gray-400">${futDescWc} 词</span></div>
+                        <div class="script-body py-1.5 pl-3.5 border-l-2 border-emerald-300"><p class="text-sm text-gray-700 leading-relaxed">${skeleton.future.description}</p></div>
+                    </div>` : ''}
+                    ${skeleton.future?.feeling ? `
+                    <div>
+                        <div class="flex items-center gap-1 mb-1"><span class="text-xs font-medium text-emerald-600">💭 感受</span><span class="text-xs text-gray-400">${futFeelWc} 词</span></div>
+                        <div class="script-body py-1.5 pl-3.5 border-l-2 border-emerald-200"><p class="text-sm text-gray-700 leading-relaxed italic">${skeleton.future.feeling}</p></div>
+                    </div>` : ''}
+                </div>
+
+            </div>
+
+            ${skeleton.outro ? `
+            <div class="mt-5">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                    <span class="text-xs font-bold text-gray-700 bg-gray-200 px-2 py-0.5 rounded">🎬 Outro 收尾</span>
+                    <span class="text-xs text-gray-400">${outroWc} 词</span>
+                </div>
+                <div class="script-body py-1.5 pl-3.5 border-l-2 border-gray-400"><p class="text-sm text-gray-700 leading-relaxed">${skeleton.outro}</p></div>
+            </div>` : ''}
+        `;
 
         return `
             <div class="story-card card rounded-2xl overflow-hidden shadow-sm fade-up" style="animation-delay:${gi * 0.08}s">
@@ -1296,7 +1386,7 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1.5">
                                 <span class="text-xs font-bold text-white bg-gradient-to-r from-violet-500 to-purple-500 px-2.5 py-0.5 rounded-full shadow-sm">事例 ${gi + 1}</span>
-                                <span class="text-xs text-violet-600 font-medium bg-violet-50 px-2 py-0.5 rounded-full">🔗 串 ${group.topics.length} 题</span>
+                                <span class="text-xs text-violet-600 font-medium bg-violet-50 px-2 py-0.5 rounded-full">🔗 串 ${skeletonTopics.length} 题</span>
                             </div>
                             <p class="text-sm font-semibold text-gray-800 leading-snug">${group.summary}</p>
                         </div>
@@ -1306,23 +1396,23 @@
                 </div>
                 <div id="group-body-${gi}" class="dropdown-content px-5 pb-5">
                     <div class="bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-200 p-4 mb-4">
-                        <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center justify-between mb-3">
                             <div class="flex items-center gap-1.5">
-                                <span class="text-xs font-bold text-violet-700 bg-violet-200 px-2 py-0.5 rounded">📖 共享主体段</span>
-                                <span class="text-xs text-gray-400">${sharedWc} 词（所有题目共用）</span>
+                                <span class="text-xs font-bold text-violet-700 bg-violet-200 px-2 py-0.5 rounded">📖 共享故事骨架</span>
+                                <span class="text-xs text-gray-400">${skeletonWc} 词（过去/现在/未来结构）</span>
                             </div>
-                            <button onclick="copySharedBody(${gi})" class="btn-action text-xs px-2.5 py-1 bg-white text-violet-600 rounded-lg hover:bg-violet-100 font-medium border border-violet-200">📋 复制</button>
+                            <button onclick="copyTimelineSkeleton(${gi})" class="btn-action text-xs px-2.5 py-1 bg-white text-violet-600 rounded-lg hover:bg-violet-100 font-medium border border-violet-200">📋 复制骨架</button>
                         </div>
-                        <div class="script-body py-2 pl-3.5 border-l-2 border-violet-400"><p class="text-sm text-gray-700 leading-relaxed">${sharedBody}</p></div>
-                        <p class="text-xs text-violet-500 mt-2 leading-relaxed">💡 这段是所有题目的共同故事核心，讲的时候不需要每次重背，只需要切换开头和结尾</p>
+                        ${timelineHTML}
+                        <p class="text-xs text-violet-500 mt-3 leading-relaxed">💡 这段故事骨架是所有题目的共同核心，讲的时候根据每个题目的"角度微调"稍作侧重即可</p>
                     </div>
                     <div class="space-y-3">${topicCards}</div>
                 </div>
             </div>`;
     }
 
-    // 独立组渲染（有 full_script，无 shared_body）
-    function renderSoloGroup(group, gi) {
+    // 兜底组渲染（solo/full_script 或 fallback script）
+    function renderFallbackGroup(group, gi) {
         return `
             <div class="story-card card rounded-2xl overflow-hidden shadow-sm fade-up" style="animation-delay:${gi * 0.08}s">
                 <div class="px-5 pt-5 pb-3 cursor-pointer" onclick="toggleGroup(${gi})">
@@ -1337,7 +1427,7 @@
                 <div id="group-body-${gi}" class="dropdown-content px-5 pb-5">
                     <div class="space-y-3">
                         ${group.topics.map((topic, ti) => {
-                            const wc = topic.full_script ? topic.full_script.split(/\s+/).filter(Boolean).length : 0;
+                            const wc = topic.full_script ? topic.full_script.split(/\s+/).filter(Boolean).length : (topic.script ? topic.script.split(/\s+/).filter(Boolean).length : 0);
                             return `
                             <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
                                 <div class="flex items-start justify-between gap-2 mb-2">
@@ -1350,7 +1440,7 @@
                                         <button onclick="copySoloScript(${gi}, ${ti})" class="btn-action text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 font-medium">📋 复制</button>
                                     </div>
                                 </div>
-                                <div class="script-body py-2"><p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">${topic.full_script || '(生成失败)'}</p></div>
+                                <div class="script-body py-2"><p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">${topic.full_script || topic.script || '(生成失败)'}</p></div>
                                 <div class="mt-2 pt-2 border-t border-gray-50 flex items-center justify-between">
                                     <div class="flex items-center gap-2">
                                         <span class="text-xs text-gray-400">难度自评：</span>
@@ -1358,8 +1448,8 @@
                                             ${[1,2,3,4,5].map(s => `<span class="star" onclick="rateStar(${gi},${ti},${s})" onmouseenter="hoverStar(${gi},${ti},${s})" onmouseleave="unhoverStar(${gi},${ti})">★</span>`).join('')}
                                         </div>
                                     </div>
-                                    <span class="text-xs ${wc >= 220 ? 'text-green-600' : wc >= 180 ? 'text-amber-500' : 'text-red-500'} font-medium">
-                                        ≈ ${wc} 词 ${wc >= 220 ? '✓' : wc >= 180 ? '~' : '⚠️'}
+                                    <span class="text-xs ${wc >= 200 ? 'text-green-600' : wc >= 170 ? 'text-amber-500' : 'text-red-500'} font-medium">
+                                        ≈ ${wc} 词 ${wc >= 200 ? '✓' : wc >= 170 ? '~' : '⚠️'}
                                     </span>
                                 </div>
                             </div>`;
@@ -1374,35 +1464,61 @@
         document.querySelector(`.chevron-${gi}`).classList.toggle('rotate-180');
     }
 
-    function getFullScript(gi, ti) {
+    function getTimelineScript(gi, ti) {
         const group = results[gi];
         if (!group) return '';
-        const topic = group.topics[ti];
-        if (!topic) return '';
-        // 共享组：拼接 opening + shared_body + enhancement + ending
-        if (topic.shared_body) {
-            return [topic.opening, topic.shared_body, topic.enhancement, topic.ending].filter(Boolean).join('\n\n');
-        }
-        // 独立组：直接返回 full_script
-        return topic.full_script || '';
+        const skeletonTopics = group.topics.filter(t => t.skeleton);
+        const topic = skeletonTopics[ti];
+        if (!topic || !topic.skeleton) return '';
+        const s = topic.skeleton;
+        return [s.intro, s.past?.description, s.past?.feeling,
+            s.present?.description, s.present?.feeling,
+            s.future?.description, s.future?.feeling,
+            s.outro, topic.angle_tweak].filter(Boolean).join('\n\n');
     }
 
-    function copyFullScript(gi, ti) {
-        const s = getFullScript(gi, ti);
+    function getTimelineSkeletonText(gi) {
+        const group = results[gi];
+        if (!group) return '';
+        const skeleton = group.topics.find(t => t.skeleton)?.skeleton;
+        if (!skeleton) return '';
+        return [skeleton.intro, skeleton.past?.description, skeleton.past?.feeling,
+            skeleton.present?.description, skeleton.present?.feeling,
+            skeleton.future?.description, skeleton.future?.feeling, skeleton.outro].filter(Boolean).join('\n\n');
+    }
+
+    function copyTimelineScript(gi, ti) {
+        const s = getTimelineScript(gi, ti);
         if (!s) return;
         navigator.clipboard.writeText(s).then(() => showToast('完整稿已复制 ✓', 'success')).catch(() => showToast('复制失败', 'error'));
     }
 
-    function copySharedBody(gi) {
-        const body = results[gi]?.shared_body || '';
-        if (!body) return;
-        navigator.clipboard.writeText(body).then(() => showToast('共享主体段已复制 ✓', 'success')).catch(() => showToast('复制失败', 'error'));
+    function copyTimelineSkeleton(gi) {
+        const s = getTimelineSkeletonText(gi);
+        if (!s) return;
+        navigator.clipboard.writeText(s).then(() => showToast('故事骨架已复制 ✓', 'success')).catch(() => showToast('复制失败', 'error'));
     }
 
-    function speakFullScript(gi, ti, btn) { const s = getFullScript(gi, ti); if (s) _speak(s, btn); }
+    function speakTimelineScript(gi, ti, btn) { const s = getTimelineScript(gi, ti); if (s) _speak(s, btn); }
 
-    function copySoloScript(gi, ti) { copyFullScript(gi, ti); }
-    function speakSoloScript(gi, ti, btn) { speakFullScript(gi, ti, btn); }
+    function copySoloScript(gi, ti) {
+        const group = results[gi];
+        if (!group) return '';
+        const topic = group.topics[ti];
+        if (!topic) return '';
+        const s = topic.full_script || topic.script || '';
+        if (!s) return;
+        navigator.clipboard.writeText(s).then(() => showToast('已复制 ✓', 'success')).catch(() => showToast('复制失败', 'error'));
+    }
+
+    function speakSoloScript(gi, ti, btn) {
+        const group = results[gi];
+        if (!group) return '';
+        const topic = group.topics[ti];
+        if (!topic) return '';
+        const s = topic.full_script || topic.script || '';
+        if (s) _speak(s, btn);
+    }
 
     function _speak(script, btn) {
         if (currentUtterance && speechSynthesis.speaking) {

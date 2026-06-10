@@ -1,4 +1,9 @@
-import { verifyUser } from './lib/supabase.js';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 // =============================================
 // Phase 1: 分组 Prompt
@@ -14,47 +19,42 @@ ${experience}
 ${topicList}
 
 ## Task:
-1. Analyze the user's experience and split it into 1-5 core events/stories
-2. Match each event to topics that can share the SAME story (2-10 topics per group, MAX 10 topics per group)
-3. Topics that DON'T fit any shared group should be listed as "solo" topics (one topic per group)
-4. For each matched topic, write a SHORT reason (20-40 words) explaining the connection
+1. Split the user's experience into 1-3 core events/stories
+2. Match each event to 2-5 topics from the list above (based on ENGLISH meaning, not just Chinese translation)
+3. For each matched topic, write a SHORT reason (30-50 words in English) explaining how the experience naturally connects to this topic
 
-## Output format (JSON ONLY):
+## Output format (JSON ONLY — no explanation, no markdown code block):
 {
   "groups": [
     {
-      "type": "shared",
-      "event_summary": "One English sentence summarizing this story",
+      "event_summary": "One Chinese sentence summarizing this story",
       "topics": [
-        { "cn": "...", "en": "...", "short_reason": "..." }
-      ]
-    },
-    {
-      "type": "solo",
-      "event_summary": "One English sentence explaining which part of the experience fits this topic",
-      "topics": [
-        { "cn": "...", "en": "...", "short_reason": "..." }
+        {
+          "cn": "Chinese topic name",
+          "en": "English topic description",
+          "short_reason": "30-50 word English explanation of how this experience connects to this topic"
+        }
       ]
     }
   ]
 }
 
 ## Rules:
-- Group topics sharing the SAME core story together (type: "shared"), MAX 10 topics per group
-- If a shared group would exceed 10 topics, split it into multiple groups
-- Topics that can't share should be solo (type: "solo", 1 topic each)
-- Every topic from the list MUST appear in exactly one group
-- Return valid JSON only, nothing else`;
+- Group topics that share the SAME core story together
+- Only match topics that genuinely fit — don't force it
+- If a topic doesn't fit any event, simply don't include it
+- Return valid JSON only, nothing else
+- Keep short_reason in English, concise and specific`;
 }
 
 // =============================================
-// Phase 2a: 共享组脚本生成 Prompt
+// Phase 2: 脚本生成 Prompt — 过去/现在/未来结构
 // =============================================
-function buildSharedGroupPrompt(experience, group) {
+function buildPhase2Prompt(experience, group) {
   const topicList = group.topics.map((t, i) =>
     `${i + 1}. ${t.cn} — ${t.en}\n   Reason: ${t.reason}`
   ).join('\n');
-  return `You are an IELTS speaking expert. The user has one shared experience that can chain multiple Part 2 topics.
+  return `You are an expert IELTS speaking coach specializing in Part 2 "story weaving" — chaining one personal experience across multiple topics using a Past → Present → Future structure.
 
 ## Original experience:
 ${experience}
@@ -65,80 +65,122 @@ ${group.summary}
 ## Topics to chain (${group.topics.length}):
 ${topicList}
 
-## OUTPUT FORMAT:
+## CRITICAL STRUCTURE — READ CAREFULLY:
 
-Produce ONE shared main body paragraph (100-150 words), then for EACH topic provide:
-- opening (40-50 words): casual, unique per topic
-- enhancement (40-50 words): tweak the angle for this topic, include an English note on the key emphasis
-- ending (40-50 words): casual reflection, unique per topic
+You must produce ONE shared story skeleton using the structure below. Then for EACH topic, provide a unique "angle tweak" paragraph.
 
-Each topic's full script = opening + shared_body + enhancement + ending ≈ 220-290 words.
+### THE SHARED SKELETON (used for ALL topics):
 
-## CRITICAL RULES:
+The skeleton has 5 parts:
 
-### Shared Main Body (100-150 words):
-- Tell the core story. Short, natural sentences. Use "like", "you know", "honestly", "actually", "I mean", "right?"
-- Contractions: "I'm", "don't", "didn't", "it's", "that's", "there's", "can't", "wasn't"
-- Sensory + emotion details. One believable detail (name, quote, moment).
-- This paragraph is the SAME for all topics.
+**1. INTRO (~30-40 words)**
+- A casual, natural opening that introduces the topic
+- DO NOT start with "The topic I want to talk about is..."
+- Use expressions like: "To be honest...", "I'd like to share...", "This actually reminds me of..."
+- Set the scene briefly and naturally
 
-### Per-Topic Parts:
-- **Opening**: Start casual, NOT "The topic I want to talk about is..."
-- **Enhancement**: NEW content bridging shared story to THIS topic. Include a short English enhancement_note on what to emphasize.
-- **Ending**: Casual reflection, NOT "In conclusion"
+**2. PAST (~50-70 words total)**
+Split into two parts:
+- **Description (past_description)**: Tell what HAPPENED in the past. Short, natural sentences. Use past tense. Include sensory details (what you saw, heard, felt physically). Include at least one believable specific detail (a name, a quote, an exact moment). Include dialogue if natural.
+- **Feeling (past_feeling)**: How you FELT about it at the time. Use emotion words naturally. "I remember feeling...", "I was so...", "Honestly, it made me..."
+
+**3. PRESENT (~50-70 words total)**
+Split into two parts:
+- **Description (present_description)**: What's happening NOW related to this experience. Are you still doing it? How has it influenced your current life? What changed because of it?
+- **Feeling (present_feeling)**: How you feel about it NOW, looking back from the present. Different from past_feeling — show growth, perspective change, or continued appreciation.
+
+**4. FUTURE (~40-60 words total)**
+Split into two parts:
+- **Description (future_description)**: What you PLAN to do or hope will happen in the future related to this. Goals, wishes, intentions.
+- **Feeling (future_feeling)**: How you ANTICIPATE you'll feel. Excitement, confidence, curiosity, etc.
+
+**5. OUTRO (~20-30 words)**
+- A casual closing reflection, NOT "In conclusion" or "To sum up"
+- Wrap up naturally: "So yeah...", "And honestly...", "I think that's..."
+
+### PER-TOPIC CUSTOM PARTS:
+
+**Angle Intro Note** (Chinese, ~15 words): Explain how to slightly adjust the INTRO when speaking for this specific topic — what angle to emphasize.
+
+**Angle Tweak** (~30-40 words each):
+- 2-3 NEW sentences that bridge the shared story to THIS specific topic
+- This is NOT a repeat — it's unique content that shifts the story's focus
+
+**Angle Outro Note** (Chinese, ~15 words): Explain what to emphasize in the OUTRO for this specific topic.
+
+## LANGUAGE RULES:
+- Use contractions: "I'm", "don't", "didn't", "it's", "that's", "there's", "can't", "wasn't"
+- Use fillers naturally: "like", "you know", "honestly", "actually", "I mean", "I guess", "right?"
+- Short, conversational sentences. NOT academic writing.
+- Include dialogue where natural.
+
+## WORD COUNT GUIDELINES:
+- Intro: ~30-40 words
+- Past (description + feeling): ~50-70 words
+- Present (description + feeling): ~50-70 words
+- Future (description + feeling): ~40-60 words
+- Outro: ~20-30 words
+- TOTAL skeleton: ~190-270 words (good for IELTS Part 2 at normal speaking pace)
 
 ## Output format (JSON ONLY):
 {
-  "shared_body": "The shared main body paragraph (100-150 words)",
+  "intro": "Intro paragraph (30-40 words)",
+  "past": {
+    "description": "What happened (30-40 words)",
+    "feeling": "How you felt (20-30 words)"
+  },
+  "present": {
+    "description": "What's happening now (30-40 words)",
+    "feeling": "How you feel now (20-30 words)"
+  },
+  "future": {
+    "description": "What you plan to do (20-35 words)",
+    "feeling": "How you anticipate feeling (20-25 words)"
+  },
+  "outro": "Outro paragraph (20-30 words)",
   "topics": [
     {
       "cn": "Chinese topic name (exact match)",
-      "opening": "...",
-      "enhancement": "...",
-      "enhancement_note": "Short note in English on what to emphasize for this topic",
-      "ending": "..."
+      "angle_intro_note": "开头角度说明（中文15字左右）",
+      "angle_tweak": "Bridge paragraph for this topic (30-40 words)",
+      "angle_outro_note": "结尾角度说明（中文15字左右）"
     }
   ]
 }
 
-EVERY topic MUST be included. Do NOT skip any. Every section (opening, enhancement, ending) must be COMPLETE — do NOT truncate or abbreviate.
+EVERY topic in the list MUST be included. Do NOT skip any.
 Return JSON only. No explanations. No markdown fences.`;
 }
 
 // =============================================
-// Phase 2b: 独立组脚本生成 Prompt
+// 兜底 Prompt（Phase 1 完全失败时）
 // =============================================
-function buildSoloPrompt(experience, topic) {
-  return `You are an IELTS speaking expert. Write a complete Part 2 speaking script for ONE topic based on the user's experience.
+function buildFallbackPrompt(experience, topics) {
+  const topicNames = topics.slice(0, 3).map(t => t.cn).join(', ');
+  return `Write a COMPLETE natural, colloquial IELTS Part 2 speaking script (200–280 words) based on this experience:
 
-## Original experience:
-${experience}
+"${experience}"
 
-## Topic to cover:
-${topic.cn} — ${topic.en}
+Topics covered: ${topicNames}
 
-## Connection:
-${topic.reason}
+## CRITICAL STRUCTURE — You MUST follow this Past → Present → Future format:
 
-## OUTPUT REQUIREMENTS:
-Write a COMPLETE natural, colloquial IELTS Part 2 speaking script (180-250 words).
+1. **INTRO** (~30 words): Casual opening. NOT "The topic I want to talk about is..."
+2. **PAST** (~60 words): What HAPPENED. Use past tense. Include sensory details and one specific detail.
+3. **PRESENT** (~60 words): What's happening NOW related to this. How has it influenced your current life?
+4. **FUTURE** (~40 words): What you PLAN to do. Goals and hopes.
+5. **OUTRO** (~25 words): Casual closing reflection. NOT "In conclusion"
 
-Structure:
-- Opening (~40 words): Start casual — NOT "The topic I want to talk about is..."
-- Main Body (~100-130 words): Short sentences, "like", "you know", "honestly", "actually". Contractions. Sensory details. One believable detail.
-- Ending (~40 words): Casual reflection — NOT "In conclusion"
+⚠️ WORD COUNT: 200–280 words. Under 200 will be REJECTED.
 
-⚠️ WORD COUNT: 180-250 words. Under 180 words will be REJECTED.
-
-⚠️ IMPORTANT: Write the COMPLETE script. Do NOT truncate, abbreviate, or leave any section unfinished. Every sentence must be fully written out.
-
+Use contractions, fillers ("like", "you know", "honestly"), short conversational sentences.
 Write only the script in English. No JSON. No explanations.`;
 }
 
 // =============================================
 // AI 调用封装
 // =============================================
-async function callAI(prompt, { temperature = 0.2, max_tokens = 4000 } = {}) {
+async function callAI(prompt, { temperature = 0.75, max_tokens = 4000 } = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 120000);
 
@@ -152,7 +194,7 @@ async function callAI(prompt, { temperature = 0.2, max_tokens = 4000 } = {}) {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are an IELTS speaking expert. Return only the requested output — no explanations, no apologies, no preamble. Write in natural, conversational English.' },
+          { role: 'system', content: 'You are an IELTS speaking expert who specializes in "story weaving" — structuring personal experiences across Past, Present, and Future for Part 2. Return only the requested output — no explanations, no apologies, no preamble. Write in natural, conversational English.' },
           { role: 'user', content: prompt }
         ],
         temperature,
@@ -193,9 +235,13 @@ function parseJSON(raw) {
   }
 }
 
-// 快速兜底脚本
+// 快速兜底脚本（过去/现在/未来结构）
 function generateQuickFallback(topic, experience) {
-  return `To be honest, ${topic.cn.toLowerCase()} is something that really means a lot to me. ${experience.substring(0, 200)} And you know, I think looking back on it now, it was honestly one of those moments that changed the way I see things. So yeah, that's my story, and I'd say it's something I'll carry with me for a long time. I guess that's why it still matters to me even now.`;
+  return `To be honest, when I think about ${topic.cn.toLowerCase()}, it really takes me back. ${experience.substring(0, 150)}
+
+Looking back at it now, I feel like it was one of those moments that shaped who I am today. I still think about it quite often, and honestly, it's changed the way I see things.
+
+And for the future, I'd really like to... well, I guess I just want to keep that feeling alive, you know? So yeah, that's pretty much my story.`;
 }
 
 // =============================================
@@ -203,13 +249,13 @@ function generateQuickFallback(topic, experience) {
 // =============================================
 async function phase1Grouping(experience, topics) {
   const prompt = buildPhase1Prompt(experience, topics);
-  const raw = await callAI(prompt, { temperature: 0.2, max_tokens: 2000 });
+  const raw = await callAI(prompt, { temperature: 0.3, max_tokens: 2000 });
 
   const data = parseJSON(raw);
   if (data && data.groups && data.groups.length > 0) {
     return data.groups.map(g => ({
-      type: g.type === 'solo' ? 'solo' : 'shared',
       summary: g.event_summary || '提取的经历',
+      text: experience,
       topics: (g.topics || []).map(t => ({
         cn: t.cn || '',
         en: t.en || '',
@@ -221,14 +267,34 @@ async function phase1Grouping(experience, topics) {
 }
 
 // =============================================
-// Phase 2a: 共享组 — 生成共享段 + 各题差异化部分
+// Phase 2: 逐组生成脚本（过去/现在/未来结构）
 // =============================================
-async function generateSharedGroup(experience, group) {
-  const prompt = buildSharedGroupPrompt(experience, group);
-  const raw = await callAI(prompt, { temperature: 0.2, max_tokens: 6000 });
+async function phase2GenerateScripts(experience, group) {
+  const prompt = buildPhase2Prompt(experience, group);
+  const raw = await callAI(prompt, { temperature: 0.75, max_tokens: 8000 });
+
   const data = parseJSON(raw);
 
-  if (data && data.shared_body && data.topics && data.topics.length > 0) {
+  if (data && data.past && data.present && data.future && data.topics && data.topics.length > 0) {
+    // 构建新的骨架结构
+    const skeleton = {
+      intro: data.intro || '',
+      past: {
+        description: data.past.description || '',
+        feeling: data.past.feeling || ''
+      },
+      present: {
+        description: data.present.description || '',
+        feeling: data.present.feeling || ''
+      },
+      future: {
+        description: data.future.description || '',
+        feeling: data.future.feeling || ''
+      },
+      outro: data.outro || ''
+    };
+
+    // 匹配每个题目的角度调整
     const topicMap = {};
     data.topics.forEach(t => { topicMap[t.cn] = t; });
 
@@ -236,89 +302,47 @@ async function generateSharedGroup(experience, group) {
       const matched = topicMap[t.cn];
       if (matched) {
         return {
-          cn: t.cn,
-          en: t.en,
-          reason: t.reason,
-          opening: matched.opening || '',
-          shared_body: data.shared_body,
-          enhancement: matched.enhancement || '',
-          enhancement_note: matched.enhancement_note || '',
-          ending: matched.ending || ''
+          ...t,
+          skeleton,
+          angle_intro_note: matched.angle_intro_note || '',
+          angle_tweak: matched.angle_tweak || '',
+          angle_outro_note: matched.angle_outro_note || ''
         };
       } else {
-        return {
-          cn: t.cn, en: t.en, reason: t.reason,
-          full_script: generateQuickFallback(t, experience)
-        };
+        return { ...t, script: generateQuickFallback(t, experience) };
       }
     });
 
-    return {
-      summary: group.summary,
-      shared_body: data.shared_body,
-      topics: topicScripts
-    };
+    return { ...group, topics: topicScripts };
   }
 
-  // 解析失败兜底：每题独立稿
+  // 解析失败兜底
   return {
-    summary: group.summary,
-    shared_body: null,
+    ...group,
     topics: group.topics.map(t => ({
-      cn: t.cn, en: t.en, reason: t.reason,
-      full_script: generateQuickFallback(t, experience)
+      ...t,
+      script: generateQuickFallback(t, experience)
     }))
-  };
-}
-
-// =============================================
-// Phase 2b: 独立组 — 生成完整稿
-// =============================================
-async function generateSoloGroup(experience, topic) {
-  try {
-    const prompt = buildSoloPrompt(experience, topic);
-    const script = await callAI(prompt, { temperature: 0.2, max_tokens: 1500 });
-
-    if (script && script.length > 80) {
-      return {
-        summary: topic.reason || topic.cn,
-        shared_body: null,
-        topics: [{
-          cn: topic.cn,
-          en: topic.en,
-          reason: topic.reason,
-          full_script: script
-        }]
-      };
-    }
-  } catch (err) {
-    console.error('Solo generation error for', topic.cn, err);
-  }
-
-  return {
-    summary: topic.reason || topic.cn,
-    shared_body: null,
-    topics: [{
-      cn: topic.cn, en: topic.en, reason: topic.reason,
-      full_script: generateQuickFallback(topic, experience)
-    }]
   };
 }
 
 // =============================================
 // 兜底生成（Phase 1 完全失败）
 // =============================================
-async function generateFallback(experience, topics) {
-  return Promise.all(topics.map(async topic => {
-    try {
-      const prompt = buildSoloPrompt(experience, topic);
-      const script = await callAI(prompt, { temperature: 0.2, max_tokens: 1500 });
-      if (script && script.length > 80) {
-        return { summary: topic.cn, shared_body: null, topics: [{ cn: topic.cn, en: topic.en, reason: '从你的经历出发', full_script: script }] };
-      }
-    } catch {}
-    return { summary: topic.cn, shared_body: null, topics: [{ cn: topic.cn, en: topic.en, reason: '从你的经历出发', full_script: generateQuickFallback(topic, experience) }] };
-  }));
+async function generateFallbackGroup(experience, topics) {
+  const prompt = buildFallbackPrompt(experience, topics);
+  const script = await callAI(prompt, { temperature: 0.75, max_tokens: 1000 });
+
+  return [{
+    summary: '基于你的经历生成',
+    text: experience.substring(0, 100),
+    topics: topics.slice(0, Math.min(3, topics.length)).map(t => ({
+      cn: t.cn,
+      en: t.en,
+      reason: '从你的经历出发',
+      script: (script && script.length > 50) ? script : generateQuickFallback(t, experience)
+    }))
+  }];
 }
 
 // =============================================
@@ -337,8 +361,8 @@ export default async function handler(req, res) {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: '未提供认证 token' });
 
-    const user = await verifyUser(token);
-    if (!user) return res.status(401).json({ error: '认证失败，请重新登录' });
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) return res.status(401).json({ error: '认证失败，请重新登录' });
 
     // 解析请求体
     const { experience, topics } = req.body;
@@ -351,19 +375,39 @@ export default async function handler(req, res) {
 
     let results;
     if (groups.length === 0) {
-      // 兜底：每题单独生成
-      results = await generateFallback(experience, topics);
+      // 兜底
+      results = await generateFallbackGroup(experience, topics);
     } else {
-      // ── 阶段二：并行生成 ──
-      const sharedGroups = groups.filter(g => g.type === 'shared' && g.topics.length >= 2);
-      const soloTopics = groups.filter(g => g.type === 'solo').flatMap(g => g.topics);
+      // ── 阶段二：逐组生成（过去/现在/未来结构） ──
+      results = [];
+      for (const group of groups) {
+        try {
+          const withScripts = await phase2GenerateScripts(experience, group);
+          results.push(withScripts);
+        } catch (err) {
+          console.error('Phase 2 error for group:', group.summary, err);
+          results.push({
+            ...group,
+            topics: group.topics.map(t => ({
+              ...t,
+              script: generateQuickFallback(t, experience)
+            }))
+          });
+        }
+      }
+    }
 
-      const resultsPromises = [
-        ...sharedGroups.map(g => generateSharedGroup(experience, g)),
-        ...soloTopics.map(t => generateSoloGroup(experience, t))
-      ];
+    // 存入数据库
+    const { error: dbError } = await supabase.from('histories').insert({
+      user_id: user.id,
+      experience,
+      selected_topics: topics,
+      results_json: results
+    });
 
-      results = await Promise.all(resultsPromises);
+    if (dbError) {
+      console.error('DB save error:', dbError);
+      // 仍然返回结果，只是没存档
     }
 
     return res.status(200).json({ success: true, groups: results });
