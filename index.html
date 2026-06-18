@@ -628,7 +628,10 @@
     function setStep(n) {
         for (let i = 1; i <= 3; i++) {
             const el = document.getElementById(`step${i}`);
-            if (el) { el.classList.remove('active', 'done'); el.classList.add(i < n ? 'done' : i === n ? 'active' : ''); }
+            if (!el) continue;
+            el.classList.remove('active', 'done');
+            if (i < n) el.classList.add('done');
+            else if (i === n) el.classList.add('active');
         }
     }
 
