@@ -717,7 +717,11 @@
             });
 
             const data = await res.json();
-            if (!res.ok || !data.success) { showError(data.error || '拆解失败'); return; }
+            if (!res.ok || !data.success) {
+                console.error('[ChainCue] API error:', res.status, data);
+                showError(data.error || `拆解失败 (HTTP ${res.status})`);
+                return;
+            }
 
             currentDecomposition = data.decomposition;
             showDecompositionForm(data.decomposition);
@@ -815,7 +819,11 @@
             });
 
             const data = await res.json();
-            if (!res.ok || !data.success) { showError(data.error || '推荐失败'); return; }
+            if (!res.ok || !data.success) {
+                console.error('[ChainCue] Recommend error:', res.status, data);
+                showError(data.error || `推荐失败 (HTTP ${res.status})`);
+                return;
+            }
 
             currentRecommendations = data.recommendations;
             showRecommendations(data.recommendations, data.total_topics);
