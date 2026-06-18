@@ -122,9 +122,8 @@
         .mood-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1.5px solid transparent; background-clip: padding-box; position: relative; }
         .mood-card::before { content: ''; position: absolute; inset: -1.5px; border-radius: inherit; background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(236,72,153,0.3), rgba(251,191,36,0.2)); z-index: -1; border-radius: 16px; }
 
-        .category-card { cursor: pointer; transition: all 0.25s ease; border: 1.5px solid #e5e7eb; background: #fff; }
-        .category-card:hover { border-color: #a78bfa; box-shadow: 0 4px 20px rgba(124,58,237,0.1); transform: translateY(-2px); }
-        .category-card.generating { opacity: 0.6; pointer-events: none; }
+        .recommend-card { cursor: pointer; transition: all 0.25s ease; }
+        .recommend-card:hover { border-color: #a78bfa; box-shadow: 0 4px 20px rgba(124,58,237,0.1); transform: translateY(-2px); }
 
         .category-badge { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; }
         .badge-high { background: #dcfce7; color: #166534; }
@@ -247,7 +246,7 @@
                     <div class="text-gray-300 text-xs self-center">→</div>
                     <div id="step2" class="step-item">
                         <span class="step-dot"></span>
-                        <span>🏷️ 映射分类</span>
+                        <span>🎯 推荐串题</span>
                     </div>
                     <div class="text-gray-300 text-xs self-center">→</div>
                     <div id="step3" class="step-item">
@@ -283,23 +282,29 @@
                 <div id="decomposeForm"></div>
                 <div class="flex gap-2 mt-4">
                     <button onclick="goBackToInput()" class="btn-secondary px-4 py-2.5 rounded-xl text-sm btn-action">← 返回</button>
-                    <button onclick="confirmDecomposition()" class="btn-main px-6 py-2.5 rounded-xl text-sm font-semibold text-white btn-action">确认并映射分类 →</button>
+                    <button onclick="confirmDecompositionAndRecommend()" class="btn-main px-6 py-2.5 rounded-xl text-sm font-semibold text-white btn-action">确认并推荐串题题目 →</button>
                 </div>
             </section>
 
-            <!-- Step 3: 类别卡片 -->
-            <section id="categorySection" class="hidden fade-up">
+            <!-- Step 3: 推荐串题题目 -->
+            <section id="recommendSection" class="hidden fade-up">
                 <div class="card rounded-2xl p-5 mb-5 shadow-sm">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
                             <div class="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
-                                <span class="text-sm">🏷️</span>
+                                <span class="text-sm">🎯</span>
                             </div>
-                            <h2 class="text-sm font-semibold text-gray-700">这个故事可以回答的类型</h2>
+                            <div>
+                                <h2 class="text-sm font-semibold text-gray-700">这个故事可以串的题目</h2>
+                                <p class="text-xs text-gray-400 mt-0.5">AI 从 63 道题库中为你精选了最匹配的题目</p>
+                            </div>
                         </div>
-                        <button onclick="saveStory()" class="btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium btn-action">💾 保存到故事库</button>
+                        <div class="flex gap-2">
+                            <button onclick="saveStory()" class="btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium btn-action">💾 保存故事</button>
+                            <button onclick="goBackToDecompose()" class="btn-ghost text-xs">← 修改拆解</button>
+                        </div>
                     </div>
-                    <div id="categoryGrid" class="grid grid-cols-2 md:grid-cols-3 gap-3"></div>
+                    <div id="recommendGrid" class="space-y-2.5"></div>
                 </div>
 
                 <!-- 手动选题（折叠） -->
@@ -308,7 +313,7 @@
                         <div class="flex items-center gap-2">
                             <span class="text-sm">📋</span>
                             <span class="text-xs font-semibold text-gray-700">手动选题生成</span>
-                            <span class="text-xs text-gray-400">选择具体题目，用当前故事生成针对性回答</span>
+                            <span class="text-xs text-gray-400">从完整题库中自行选择</span>
                         </div>
                         <svg class="w-5 h-5 text-gray-400 transition-transform duration-300" id="manualChevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </div>
@@ -470,6 +475,7 @@
     let currentRawText = '';           // 当前故事原文
     let currentStoryId = null;         // 当前故事 ID（已保存的）
     let currentCategories = [];        // 当前映射的类别
+    let currentRecommendations = [];   // 当前推荐的串题题目
     let currentAnswer = null;          // 当前生成的答案
     let currentUtterance = null;       // 当前朗读的 utterance
 
@@ -614,7 +620,7 @@
     }
 
     function hideAll() {
-        ['loadingSection', 'errorSection', 'decomposeSection', 'categorySection', 'answerSection'].forEach(id => {
+        ['loadingSection', 'errorSection', 'decomposeSection', 'recommendSection', 'answerSection'].forEach(id => {
             document.getElementById(id).classList.add('hidden');
         });
     }
@@ -666,6 +672,7 @@
         currentRawText = '';
         currentStoryId = null;
         currentCategories = [];
+        currentRecommendations = [];
         currentAnswer = null;
         hideAll();
         checkDecomposeBtn();
@@ -792,26 +799,26 @@
     }
 
     // ========================================
-    // Step 2→3: 确认拆解 → 映射类别
+    // Step 2→3: 确认拆解 → 推荐串题题目
     // ========================================
-    async function confirmDecomposition() {
+    async function confirmDecompositionAndRecommend() {
         currentDecomposition = collectDecompositionFromForm();
 
-        showLoading('AI 正在映射类别<span class="loading-dots"></span>', '分析适合的 IELTS 题目类型...', 2);
+        showLoading('AI 正在为你推荐串题题目<span class="loading-dots"></span>', '从 63 道题库中匹配最适合的...', 2);
 
         try {
             const token = (await sbClient.auth.getSession()).data.session?.access_token;
-            const res = await fetch('/api/map-categories', {
+            const res = await fetch('/api/recommend-topics', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ decomposition: currentDecomposition, story_id: currentStoryId })
+                body: JSON.stringify({ decomposition: currentDecomposition })
             });
 
             const data = await res.json();
-            if (!res.ok || !data.success) { showError(data.error || '映射失败'); return; }
+            if (!res.ok || !data.success) { showError(data.error || '推荐失败'); return; }
 
-            currentCategories = data.categories;
-            showCategories(data.categories);
+            currentRecommendations = data.recommendations;
+            showRecommendations(data.recommendations, data.total_topics);
         } catch (err) {
             showError('网络错误，请稍后重试');
             console.error(err);
@@ -819,45 +826,48 @@
     }
 
     // ========================================
-    // Step 3: 展示类别卡片
+    // Step 3: 展示推荐串题题目
     // ========================================
-    function showCategories(categories) {
+    function showRecommendations(recommendations, totalTopics) {
         hideAll();
-        const grid = document.getElementById('categoryGrid');
+        const grid = document.getElementById('recommendGrid');
 
-        const iconMap = {
-            'Person': '👤', 'Experience': '📖', 'Achievement': '🏆', 'Challenge': '⚡',
-            'Skill': '🛠️', 'Learning': '📚', 'Decision': '🔀', 'Future Plan': '🚀',
-            'Interesting Event': '✨', 'Proud Moment': '🌟'
-        };
-
-        grid.innerHTML = categories.map((c, i) => `
-            <div class="category-card rounded-xl p-4" id="catCard_${i}" onclick="generateForCategory(${i})">
-                <div class="flex items-center gap-1.5 mb-2">
-                    <span class="text-base">${iconMap[c.category] || '📌'}</span>
-                    <span class="text-sm font-semibold text-gray-800">${c.category}</span>
-                    <span class="category-badge ${c.confidence === 'high' ? 'badge-high' : 'badge-medium'}">${c.confidence === 'high' ? '高匹配' : '可适配'}</span>
+        grid.innerHTML = recommendations.map((r, i) => `
+            <div class="recommend-card card rounded-xl p-4 cursor-pointer hover:border-violet-300 hover:shadow-md transition-all" id="recCard_${i}" onclick="generateForRecommendation(${i})">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                            <span class="text-sm font-semibold text-gray-800">${r.topic_cn}</span>
+                            <span class="category-badge ${r.confidence === 'high' ? 'badge-high' : 'badge-medium'}">${r.confidence === 'high' ? '高匹配' : '可适配'}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 leading-relaxed mb-1.5 italic">"${r.topic_en}"</p>
+                        <p class="text-xs text-gray-400 leading-relaxed mb-2">${r.reason}</p>
+                        <p class="text-xs text-violet-600 leading-relaxed">💡 角度：${r.angle}</p>
+                    </div>
+                    <button class="btn-main px-3 py-1.5 rounded-lg text-xs font-medium text-white flex-shrink-0 mt-1 btn-action" onclick="event.stopPropagation(); generateForRecommendation(${i})">✍️ 串题</button>
                 </div>
-                <p class="text-xs text-gray-500 leading-relaxed mb-2">${c.reason}</p>
-                <p class="text-xs text-violet-600 leading-relaxed italic">→ ${c.angle}</p>
-                <button class="mt-2 w-full btn-main px-3 py-1.5 rounded-lg text-xs font-medium text-white">✍️ 生成口语稿</button>
             </div>
         `).join('');
 
-        document.getElementById('categorySection').classList.remove('hidden');
+        document.getElementById('recommendSection').classList.remove('hidden');
         setStep(2);
     }
 
-    // ========================================
-    // Step 3→4: 点击类别 → 生成答案
-    // ========================================
-    async function generateForCategory(index) {
-        const cat = currentCategories[index];
-        if (!cat || !currentDecomposition) return;
+    function goBackToDecompose() {
+        hideAll();
+        showDecompositionForm(currentDecomposition);
+    }
 
-        // 显示卡片加载状态
-        const card = document.getElementById(`catCard_${index}`);
+    // ========================================
+    // Step 3→4: 点击推荐题目 → 生成答案
+    // ========================================
+    async function generateForRecommendation(index) {
+        const rec = currentRecommendations[index];
+        if (!rec || !currentDecomposition) return;
+
+        const card = document.getElementById(`recCard_${index}`);
         card.classList.add('generating');
+        card.style.opacity = '0.6';
         card.querySelector('button').textContent = '⏳ 生成中...';
 
         try {
@@ -867,8 +877,9 @@
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
                     decomposition: currentDecomposition,
-                    category: cat.category,
-                    angle: cat.angle,
+                    category: rec.topic_cn,
+                    angle: rec.angle,
+                    topic_en: rec.topic_en,
                     story_id: currentStoryId
                 })
             });
@@ -876,17 +887,17 @@
             const data = await res.json();
             if (!res.ok || !data.success) {
                 showToast(data.error || '生成失败', 'error');
-                card.classList.remove('generating');
-                card.querySelector('button').textContent = '✍️ 生成口语稿';
+                card.style.opacity = '1';
+                card.querySelector('button').textContent = '✍️ 串题';
                 return;
             }
 
             currentAnswer = data.answer;
-            showAnswer(data.answer, cat.category);
+            showAnswer(data.answer, `${rec.topic_cn} — ${rec.topic_en}`);
         } catch (err) {
             showToast('网络错误', 'error');
-            card.classList.remove('generating');
-            card.querySelector('button').textContent = '✍️ 生成口语稿';
+            card.style.opacity = '1';
+            card.querySelector('button').textContent = '✍️ 串题';
         }
     }
 
@@ -959,8 +970,9 @@
         document.getElementById('answerSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
         setStep(3);
 
-        // 恢复类别卡片状态
-        document.querySelectorAll('.category-card').forEach(c => { c.classList.remove('generating'); });
+        // 恢复推荐卡片状态
+        document.querySelectorAll('.recommend-card').forEach(c => { c.style.opacity = '1'; });
+        // 恢复手动选题卡片状态（无特殊样式需恢复）
     }
 
     function getAnswerFullText() {
@@ -1018,7 +1030,8 @@
                 body: JSON.stringify({
                     decomposition: currentDecomposition,
                     category: topic.cn,
-                    angle: `Answer the IELTS Part 2 question: "${topic.en}"`,
+                    angle: `Use the story to answer this IELTS Part 2 question naturally`,
+                    topic_en: topic.en,
                     story_id: currentStoryId
                 })
             });
@@ -1027,7 +1040,7 @@
             if (!res.ok || !data.success) { showError(data.error || '生成失败'); return; }
 
             currentAnswer = data.answer;
-            showAnswer(data.answer, topic.cn);
+            showAnswer(data.answer, `${topic.cn} — ${topic.en}`);
         } catch (err) {
             showError('网络错误，请稍后重试');
         }
@@ -1125,13 +1138,8 @@
 
             document.getElementById('storyInput').value = story.raw_text;
 
-            // 如果有 categories，直接显示
-            if (story.categories && story.categories.length > 0) {
-                currentCategories = story.categories.map(c => typeof c === 'string' ? { category: c, confidence: 'high', reason: '', angle: '' } : c);
-                showCategories(currentCategories);
-            } else {
-                showDecompositionForm(story.decomposition);
-            }
+            // 直接显示拆解结果（让用户确认后再推荐）
+            showDecompositionForm(story.decomposition);
         } catch (err) {
             showError('网络错误');
         }

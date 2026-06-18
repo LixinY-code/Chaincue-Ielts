@@ -8,24 +8,31 @@ const supabase = createClient(
 // =============================================
 // Answer Generation Prompt
 // =============================================
-function buildAnswerPrompt(decomposition, category, angle) {
+function buildAnswerPrompt(decomposition, category, angle, topicEn) {
   const decStr = JSON.stringify(decomposition, null, 2);
+
+  // 如果有具体题目文本，按题目生成针对性答案
+  const topicSection = topicEn
+    ? `\n## IELTS Part 2 Question (EXACT):\n"${topicEn}"\n\n## CRITICAL: The answer MUST directly address the question above. Every paragraph should relate to what the examiner asked. Do NOT write a generic answer.`
+    : '';
+
   return `You are an expert IELTS speaking coach specializing in Part 2 answer generation.
 
 ## Story decomposition:
 ${decStr}
 
-## Target category: ${category}
+## Target: ${category}
+${topicSection}
 ${angle ? `\n## Suggested angle: ${angle}` : ''}
 
 ## Task:
-Generate a complete IELTS Part 2 speaking answer using this story for the "${category}" category. The answer should feel like a real person telling a real story — NOT a memorized script.
+Generate a complete IELTS Part 2 speaking answer using this story for "${category}". The answer should feel like a real person telling a real story — NOT a memorized script.
 
 ## CRITICAL STRUCTURE:
 
 **1. INTRO (~30-40 words)**
 - Casual, natural opening that connects the story to "${category}"
-- DO NOT start with "The topic I want to talk about is..." or "I'd like to describe..."
+${topicEn ? '- Answer the question directly and naturally — e.g. "Well, when it comes to [topic], the first thing that comes to mind is..."' : '- DO NOT start with "The topic I want to talk about is..." or "I\'d like to describe..."'}
 - Use: "To be honest...", "Well, this actually reminds me of...", "You know, I've been thinking about..."
 - Set the scene briefly and naturally
 
@@ -152,12 +159,12 @@ export default async function handler(req, res) {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) return res.status(401).json({ error: '认证失败，请重新登录' });
 
-    const { decomposition, category, angle, story_id } = req.body;
+    const { decomposition, category, angle, topic_en, story_id } = req.body;
     if (!decomposition || !category) {
       return res.status(400).json({ error: '请提供故事拆解数据和目标类别' });
     }
 
-    const prompt = buildAnswerPrompt(decomposition, category, angle);
+    const prompt = buildAnswerPrompt(decomposition, category, angle, topic_en);
     const aiRaw = await callAI(prompt);
     const answer = parseJSON(aiRaw);
 
