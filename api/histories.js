@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     if (!user) return res.status(401).json({ error: '认证失败' });
 
     const data = await sbQuery('histories', {
-      select: 'id,created_at,experience,selected_topics,results_json',
+      select: 'id,created_at,experience,selected_topics,results_json,generation_type,story_id',
       eq: { user_id: user.id },
       order: 'created_at',
       ascending: false,
@@ -30,7 +30,9 @@ export default async function handler(req, res) {
       topic_count: (h.selected_topics || []).length,
       experience: h.experience,
       selected_topics: h.selected_topics,
-      results_json: h.results_json
+      results_json: h.results_json,
+      generation_type: h.generation_type || 'decompose',
+      story_id: h.story_id || null
     }));
 
     return res.status(200).json({ success: true, histories });

@@ -15,20 +15,20 @@ export default async function handler(req, res) {
     const user = await verifyUser(token);
     if (!user) return res.status(401).json({ error: '认证失败' });
 
-    const { history_id, note } = req.body;
-    if (!history_id) return res.status(400).json({ error: '缺少 history_id' });
+    const { story_id, note } = req.body;
+    if (!story_id) return res.status(400).json({ error: '缺少 story_id' });
 
-    // 确认该 history 属于当前用户
-    const historyData = await sbQuery('histories', {
+    // 确认该 story 属于当前用户
+    const storyData = await sbQuery('stories', {
       select: 'id',
-      eq: { id: history_id, user_id: user.id },
+      eq: { id: story_id, user_id: user.id },
       limit: 1
     });
-    const history = Array.isArray(historyData) ? historyData[0] : historyData;
-    if (!history) return res.status(404).json({ error: '记录不存在' });
+    const story = Array.isArray(storyData) ? storyData[0] : storyData;
+    if (!story) return res.status(404).json({ error: '故事不存在' });
 
     // Upsert archive
-    await sbUpsert('archives', { user_id: user.id, history_id, note: note || null }, 'user_id,history_id');
+    await sbUpsert('archives', { user_id: user.id, story_id, note: note || null }, 'user_id,story_id');
 
     return res.status(200).json({ success: true, message: '收藏成功' });
 

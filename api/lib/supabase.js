@@ -87,4 +87,40 @@ async function sbUpsert(table, row, onConflict) {
   return true;
 }
 
-export { verifyUser, sbQuery, sbInsert, sbUpsert, SB_URL };
+// Supabase REST API 更新
+async function sbUpdate(table, id, row) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': `Bearer ${SB_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(row)
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  return true;
+}
+
+// Supabase REST API 删除
+async function sbDelete(table, id) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': `Bearer ${SB_KEY}`,
+      'Prefer': 'return=minimal'
+    }
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  return true;
+}
+
+export { verifyUser, sbQuery, sbInsert, sbUpsert, sbUpdate, sbDelete, SB_URL };
