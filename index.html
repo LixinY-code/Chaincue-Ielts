@@ -104,13 +104,9 @@
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; }
         .modal-overlay.show { display: flex; }
         .modal-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: 20px; padding: 2rem; width: 380px; max-width: 92vw; box-shadow: 0 20px 60px rgba(0,0,0,0.15); border: 1px solid rgba(139,92,246,0.15); }
+        .modal-box-lg { width: 640px; max-width: 94vw; max-height: 85vh; overflow-y: auto; }
         .auth-tab { padding: 6px 16px; border-radius: 99px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; color: #6b7280; }
         .auth-tab.active { background: #7c3aed; color: #fff; box-shadow: 0 2px 8px rgba(124,58,237,0.3); }
-
-        .history-sidebar { position: fixed; top: 0; right: 0; bottom: 0; width: 380px; max-width: 90vw; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); z-index: 90; transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); box-shadow: -4px 0 30px rgba(0,0,0,0.1); border-left: 1px solid rgba(139,92,246,0.1); }
-        .history-sidebar.open { transform: translateX(0); }
-        .history-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.2); z-index: 89; display: none; }
-        .history-backdrop.show { display: block; }
 
         .user-menu { position: absolute; top: 100%; right: 0; margin-top: 6px; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(139,92,246,0.12); border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); min-width: 160px; overflow: hidden; display: none; z-index: 50; }
         .user-menu.show { display: block; }
@@ -124,6 +120,7 @@
 
         .recommend-card { cursor: pointer; transition: all 0.25s ease; }
         .recommend-card:hover { border-color: #a78bfa; box-shadow: 0 4px 20px rgba(124,58,237,0.1); transform: translateY(-2px); }
+        .recommend-card.selected { border-color: #7c3aed; box-shadow: 0 0 0 2px rgba(124,58,237,0.2), 0 4px 20px rgba(124,58,237,0.1); }
 
         .category-badge { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; }
         .badge-high { background: #dcfce7; color: #166534; }
@@ -136,10 +133,55 @@
         .decompose-field .tag-list { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
         .decompose-field .tag { padding: 2px 8px; border-radius: 99px; font-size: 11px; background: #f3f0ff; color: #6d28d9; }
 
-        .story-lib-card { padding: 12px; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; transition: all 0.2s; }
-        .story-lib-card:hover { border-color: #a78bfa; box-shadow: 0 2px 12px rgba(124,58,237,0.08); }
-
         .timeline-dot { width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+        /* ===== Navigation ===== */
+        .nav-tab { padding: 8px 18px; border-radius: 99px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.25s ease; color: #6b7280; background: transparent; border: 1px solid transparent; }
+        .nav-tab:hover { color: #7c3aed; background: rgba(139, 92, 246, 0.05); }
+        .nav-tab.active { color: #fff; background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3); }
+
+        /* ===== Split Layout ===== */
+        .split-layout { display: grid; grid-template-columns: 2fr 3fr; gap: 20px; min-height: calc(100vh - 180px); }
+        @media (max-width: 768px) {
+            .split-layout { grid-template-columns: 1fr; min-height: auto; }
+        }
+
+        .panel-left { position: sticky; top: 80px; align-self: start; max-height: calc(100vh - 100px); overflow-y: auto; }
+        @media (max-width: 768px) {
+            .panel-left { position: static; max-height: none; }
+        }
+
+        /* ===== Placeholder ===== */
+        .placeholder-panel {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 300px; text-align: center; color: #9ca3af;
+        }
+        .placeholder-panel .placeholder-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.6; }
+
+        /* ===== Story Library Cards ===== */
+        .story-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .story-card {
+            background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.1); border-radius: 16px;
+            padding: 16px; cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .story-card:hover {
+            border-color: #a78bfa;
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* ===== Announcement Modal ===== */
+        .announcement-badge {
+            position: absolute; top: -4px; right: -4px;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #ef4444; border: 2px solid #fff;
+        }
+
+        /* ===== Page transition ===== */
+        .page-container { display: none; }
+        .page-container.active { display: block; animation: fadeUp 0.3s ease-out; }
     </style>
 </head>
 
@@ -149,207 +191,289 @@
 
     <div class="min-h-screen relative" style="z-index:1;">
 
-        <!-- 顶部品牌区 -->
-        <div class="pt-8 pb-4 text-center relative">
-            <div class="inline-flex items-center gap-2.5 mb-2">
-                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-lg shadow-lg shadow-violet-200">
-                    📖
+        <!-- ===== 顶部导航栏 ===== -->
+        <nav class="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-violet-100/50">
+            <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center gap-2.5 flex-shrink-0">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-sm shadow-lg shadow-violet-200">
+                        📖
+                    </div>
+                    <span class="text-xl font-bold brand-title tracking-tight">题链扣</span>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold brand-title tracking-tight">
-                    题链扣
-                </h1>
-            </div>
-            <p class="text-gray-500 text-sm md:text-base font-medium">
-                你的雅思口语故事库 &nbsp;·&nbsp; 每个真实故事，都是一把万能钥匙
-            </p>
 
-            <div class="absolute top-6 right-4 md:right-8 flex items-center gap-2">
-                <button id="storyLibBtn" onclick="toggleStorySidebar()" class="btn-secondary px-3 py-1.5 rounded-xl text-xs font-medium btn-action hidden" title="我的故事库">
-                    📚 故事库 <span id="storyCountBadge" class="ml-0.5 bg-violet-500 text-white text-[10px] px-1.5 py-0.5 rounded-full hidden">0</span>
-                </button>
-                <div class="relative">
-                    <button id="authBtn" onclick="handleAuthBtnClick()" class="btn-secondary px-3.5 py-1.5 rounded-xl text-xs font-medium btn-action">
-                        登录 / 注册
+                <!-- 导航标签 -->
+                <div class="flex items-center gap-2 bg-gray-50/80 rounded-full p-1 border border-gray-100">
+                    <button class="nav-tab active" data-page="home" onclick="navigateTo('home')">
+                        🔍 串题
                     </button>
-                    <div id="userMenu" class="user-menu">
-                        <div class="user-menu-item" onclick="toggleStorySidebar()">
-                            <span>📚</span> 我的故事库
-                        </div>
-                        <div class="user-menu-item" onclick="handleLogout()">
-                            <span>🚪</span> 退出登录
+                    <button class="nav-tab" data-page="recommend" onclick="navigateTo('recommend')">
+                        🎯 推荐
+                    </button>
+                    <button class="nav-tab" data-page="stories" onclick="navigateTo('stories')">
+                        📚 故事库
+                    </button>
+                </div>
+
+                <!-- 用户区 -->
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <!-- 公告按钮 -->
+                    <button id="announcementBtn" onclick="showAnnouncement()" class="relative p-2 rounded-xl hover:bg-violet-50 transition-colors hidden" title="更新公告">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    </button>
+
+                    <div class="relative">
+                        <button id="authBtn" onclick="handleAuthBtnClick()" class="btn-secondary px-3.5 py-1.5 rounded-xl text-xs font-medium btn-action">
+                            登录 / 注册
+                        </button>
+                        <div id="userMenu" class="user-menu">
+                            <div class="user-menu-item" onclick="navigateTo('stories'); closeUserMenu();">
+                                <span>📚</span> 我的故事库
+                            </div>
+                            <div class="user-menu-item" onclick="handleLogout()">
+                                <span>🚪</span> 退出登录
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </nav>
 
-        <div class="container mx-auto px-4 pb-12 max-w-4xl">
+        <!-- ===== 主内容区 ===== -->
+        <main class="max-w-6xl mx-auto px-4 py-6">
 
-            <!-- 氛围卡片 -->
-            <div class="flex justify-end mb-4">
-                <div id="moodCard" class="mood-card rounded-2xl px-5 py-3.5 max-w-xs text-right shadow-sm">
-                    <p class="text-xs font-semibold text-violet-700 mb-0.5">🎯 每日一句</p>
-                    <p id="moodText" class="text-xs text-gray-600 leading-relaxed"></p>
+            <!-- ==================== 页面一：串题（主页） ==================== -->
+            <div id="page-home" class="page-container active">
+                <div class="split-layout">
+                    <!-- 左栏：故事输入 -->
+                    <div class="panel-left">
+                        <div class="card rounded-2xl p-5 shadow-sm">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
+                                    <span class="text-sm">✍️</span>
+                                </div>
+                                <h2 class="text-sm font-semibold text-gray-700">输入你的故事</h2>
+                            </div>
+
+                            <p class="text-xs text-gray-400 mb-3">越具体越好 — 谁、做了什么、在哪、感受如何。</p>
+
+                            <div class="flex items-center gap-2 mb-3 flex-wrap">
+                                <span class="text-xs text-gray-400">✨ 没灵感？</span>
+                                <button onclick="fillTemplate(0)" class="template-btn text-xs px-3 py-1.5 rounded-full">🏔️ 旅行迷路</button>
+                                <button onclick="fillTemplate(1)" class="template-btn text-xs px-3 py-1.5 rounded-full">☕ 咖啡店打工</button>
+                                <button onclick="fillTemplate(2)" class="template-btn text-xs px-3 py-1.5 rounded-full">🎨 学画画受挫</button>
+                            </div>
+
+                            <textarea id="storyInput"
+                                placeholder="在这里写下你的经历，哪怕只是一句话也可以！&#10;&#10;例如：去年暑假我在学校旁边的咖啡店打工了两个月..."
+                                class="input-field w-full h-36 p-4 rounded-xl resize-none text-sm text-gray-700 leading-relaxed"></textarea>
+
+                            <div class="flex items-center justify-between mt-3">
+                                <span id="charCount" class="text-xs text-gray-400">0 字符</span>
+                                <div class="flex gap-2">
+                                    <button onclick="clearStoryInput()" class="btn-secondary px-4 py-2.5 rounded-xl text-sm btn-action">
+                                        重置
+                                    </button>
+                                    <button id="decomposeBtn" onclick="startDecompose()"
+                                        class="btn-main px-6 py-2.5 rounded-xl text-sm font-semibold text-white btn-action btn-disabled">
+                                        🔍 分解故事
+                                    </button>
+                                    <span id="loginHint" class="text-xs text-gray-400 ml-2 self-center hidden">💡 请先登录</span>
+                                </div>
+                            </div>
+
+                            <!-- 进度指示 -->
+                            <div class="flex items-center gap-3 mt-4 pt-4 border-t border-gray-100">
+                                <div id="progressStep1" class="step-item active">
+                                    <span class="step-dot"></span><span>拆解</span>
+                                </div>
+                                <div class="text-gray-200 text-xs">→</div>
+                                <div id="progressStep2" class="step-item">
+                                    <span class="step-dot"></span><span>推荐</span>
+                                </div>
+                                <div class="text-gray-200 text-xs">→</div>
+                                <div id="progressStep3" class="step-item">
+                                    <span class="step-dot"></span><span>生成</span>
+                                </div>
+                            </div>
+                            <p id="progressStatus" class="text-xs text-gray-400 mt-2">等待输入...</p>
+                        </div>
+                    </div>
+
+                    <!-- 右栏：拆解详情 -->
+                    <div class="panel-right">
+                        <!-- 初始占位 -->
+                        <div id="homePlaceholder" class="placeholder-panel card rounded-2xl shadow-sm">
+                            <div class="placeholder-icon">👆</div>
+                            <p class="text-sm text-gray-400 font-medium">输入你的故事，点击「分解」开始分析</p>
+                            <p class="text-xs text-gray-300 mt-2">AI 将从 13 个维度拆解你的经历</p>
+                        </div>
+
+                        <!-- 加载中 -->
+                        <div id="homeLoading" class="hidden card rounded-2xl p-8 text-center shadow-sm">
+                            <div class="inline-block animate-spin rounded-full h-10 w-10 border-[3px] border-violet-100 border-t-violet-600 mb-4"></div>
+                            <p class="text-base font-medium text-gray-700">AI 正在拆解你的故事<span class="loading-dots"></span></p>
+                            <p class="text-xs text-gray-400 mt-1 mb-4">分析经历、提取维度...</p>
+                            <div class="w-full max-w-xs mx-auto loading-bar"></div>
+                        </div>
+
+                        <!-- 错误提示 -->
+                        <div id="homeError" class="hidden card rounded-2xl p-6 shadow-sm bg-red-50/80 border border-red-100">
+                            <div class="flex items-start gap-3">
+                                <span class="text-2xl">❌</span>
+                                <div>
+                                    <h3 class="font-semibold text-red-700 text-sm">出错了</h3>
+                                    <p id="homeErrorMessage" class="text-red-600 text-xs mt-1"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 拆解结果 -->
+                        <div id="homeDecompose" class="hidden card rounded-2xl p-5 shadow-sm fade-up">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
+                                        <span class="text-sm">🧩</span>
+                                    </div>
+                                    <h2 class="text-sm font-semibold text-gray-700">故事拆解结果</h2>
+                                    <span class="text-xs text-gray-400">可以编辑调整</span>
+                                </div>
+                            </div>
+                            <div id="decomposeForm" class="max-h-[calc(100vh-320px)] overflow-y-auto pr-1"></div>
+                            <div class="flex gap-2 mt-4">
+                                <button onclick="goBackToInput()" class="btn-secondary px-4 py-2.5 rounded-xl text-sm btn-action">← 重新输入</button>
+                                <button onclick="confirmAndRecommend()" class="btn-main px-6 py-2.5 rounded-xl text-sm font-semibold text-white btn-action">确认并推荐串题题目 →</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Step 1: 故事输入 -->
-            <section id="storyInputSection" class="card rounded-2xl p-5 mb-5 shadow-sm">
-                <div class="flex items-center gap-2 mb-3">
-                    <div class="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
-                        <span class="text-sm">✍️</span>
-                    </div>
-                    <h2 class="text-sm font-semibold text-gray-700">写下你的真实经历</h2>
-                </div>
+            <!-- ==================== 页面二：推荐与生成 ==================== -->
+            <div id="page-recommend" class="page-container">
+                <div class="split-layout" style="grid-template-columns: 1fr 2fr;">
+                    <!-- 左栏：题目列表 -->
+                    <div class="panel-left">
+                        <div class="card rounded-2xl p-5 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
+                                        <span class="text-sm">🎯</span>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-sm font-semibold text-gray-700">推荐题目</h2>
+                                        <p class="text-xs text-gray-400 mt-0.5">5-10 道</p>
+                                    </div>
+                                </div>
+                                <button onclick="saveStory()" id="saveStoryBtn" class="btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium btn-action hidden">💾 保存</button>
+                            </div>
 
-                <p class="text-xs text-gray-400 mb-3">越具体越好 — 谁、做了什么、在哪、感受如何。一个故事 = 多个口语素材角度。</p>
+                            <!-- 无数据占位 -->
+                            <div id="recEmptyPlaceholder" class="placeholder-panel" style="min-height: 200px;">
+                                <div class="placeholder-icon" style="font-size: 32px;">📋</div>
+                                <p class="text-xs text-gray-400">请先在「串题」页分解故事</p>
+                            </div>
 
-                <div class="flex items-center gap-2 mb-3 flex-wrap">
-                    <span class="text-xs text-gray-400">✨ 没灵感？试试：</span>
-                    <button onclick="fillTemplate(0)" class="template-btn text-xs px-3 py-1.5 rounded-full">🏔️ 和朋友旅行迷路</button>
-                    <button onclick="fillTemplate(1)" class="template-btn text-xs px-3 py-1.5 rounded-full">☕ 咖啡店打工趣事</button>
-                    <button onclick="fillTemplate(2)" class="template-btn text-xs px-3 py-1.5 rounded-full">🎨 小时候学画画受挫</button>
-                </div>
+                            <!-- 题目列表 -->
+                            <div id="recTopicList" class="space-y-2.5 max-h-[calc(100vh-260px)] overflow-y-auto pr-1"></div>
 
-                <textarea id="storyInput"
-                    placeholder="在这里写下你的经历，哪怕只是一句话也可以！&#10;&#10;例如：去年暑假我在学校旁边的咖啡店打工了两个月..."
-                    class="input-field w-full h-36 p-4 rounded-xl resize-none text-sm text-gray-700 leading-relaxed"></textarea>
-
-                <div class="flex items-center justify-between mt-3">
-                    <span id="charCount" class="text-xs text-gray-400">0 字符</span>
-                    <div class="flex gap-2">
-                        <button onclick="clearStoryInput()" class="btn-secondary px-4 py-2.5 rounded-xl text-sm btn-action">
-                            重置
-                        </button>
-                        <button id="decomposeBtn" onclick="startDecompose()"
-                            class="btn-main px-6 py-3 rounded-xl text-sm font-semibold text-white btn-action btn-disabled">
-                            🔍 分解故事
-                        </button>
-                        <span id="loginHint" class="text-xs text-gray-400 ml-2 self-center hidden">💡 请先登录</span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 加载中 -->
-            <section id="loadingSection" class="hidden card rounded-2xl p-8 mb-5 text-center">
-                <div class="inline-block animate-spin rounded-full h-10 w-10 border-[3px] border-violet-100 border-t-violet-600 mb-4"></div>
-                <p id="loadingTitle" class="text-base font-medium text-gray-700">
-                    AI 正在分析<span class="loading-dots"></span>
-                </p>
-                <p id="loadingSub" class="text-xs text-gray-400 mt-1 mb-4">准备中...</p>
-                <div class="w-full max-w-xs mx-auto loading-bar mb-5"></div>
-                <div class="flex justify-center gap-3 flex-wrap">
-                    <div id="step1" class="step-item active">
-                        <span class="step-dot"></span>
-                        <span>🔍 拆解故事</span>
-                    </div>
-                    <div class="text-gray-300 text-xs self-center">→</div>
-                    <div id="step2" class="step-item">
-                        <span class="step-dot"></span>
-                        <span>🎯 推荐串题</span>
-                    </div>
-                    <div class="text-gray-300 text-xs self-center">→</div>
-                    <div id="step3" class="step-item">
-                        <span class="step-dot"></span>
-                        <span>✍️ 生成口语稿</span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 错误提示 -->
-            <section id="errorSection" class="hidden card rounded-2xl p-6 mb-5 shadow-sm bg-red-50/80 border border-red-100">
-                <div class="flex items-start gap-3">
-                    <span class="text-2xl">❌</span>
-                    <div>
-                        <h3 class="font-semibold text-red-700 text-sm">出错了</h3>
-                        <p id="errorMessage" class="text-red-600 text-xs mt-1"></p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Step 2: 故事拆解审核 -->
-            <section id="decomposeSection" class="hidden card rounded-2xl p-5 mb-5 shadow-sm fade-up">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
-                            <span class="text-sm">🧩</span>
+                            <!-- 手动选题折叠 -->
+                            <div id="recManualSection" class="hidden mt-4 pt-4 border-t border-gray-100">
+                                <div class="cursor-pointer flex items-center justify-between mb-2" onclick="toggleManualTopics()">
+                                    <span class="text-xs font-semibold text-gray-700">📋 手动选题</span>
+                                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-300" id="manualChevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                                <div id="manualTopicSection" class="dropdown-content">
+                                    <div id="topicGrid" class="grid grid-cols-2 gap-1.5 max-h-52 overflow-y-auto pr-1"></div>
+                                </div>
+                            </div>
                         </div>
-                        <h2 class="text-sm font-semibold text-gray-700">故事拆解结果</h2>
-                        <span class="text-xs text-gray-400">可以编辑调整</span>
                     </div>
-                    <button onclick="goBackToInput()" class="btn-ghost text-xs">← 返回修改</button>
-                </div>
-                <div id="decomposeForm"></div>
-                <div class="flex gap-2 mt-4">
-                    <button onclick="goBackToInput()" class="btn-secondary px-4 py-2.5 rounded-xl text-sm btn-action">← 返回</button>
-                    <button onclick="confirmDecompositionAndRecommend()" class="btn-main px-6 py-2.5 rounded-xl text-sm font-semibold text-white btn-action">确认并推荐串题题目 →</button>
-                </div>
-            </section>
 
-            <!-- Step 3: 推荐串题题目 -->
-            <section id="recommendSection" class="hidden fade-up">
-                <div class="card rounded-2xl p-5 mb-5 shadow-sm">
+                    <!-- 右栏：口语稿预览 -->
+                    <div class="panel-right">
+                        <!-- 初始占位 -->
+                        <div id="recPlaceholder" class="placeholder-panel card rounded-2xl shadow-sm">
+                            <div class="placeholder-icon">👈</div>
+                            <p class="text-sm text-gray-400 font-medium">点击左侧题目生成稿子</p>
+                        </div>
+
+                        <!-- 加载中 -->
+                        <div id="recLoading" class="hidden card rounded-2xl p-8 text-center shadow-sm">
+                            <div class="inline-block animate-spin rounded-full h-10 w-10 border-[3px] border-violet-100 border-t-violet-600 mb-4"></div>
+                            <p class="text-base font-medium text-gray-700">AI 正在生成口语稿<span class="loading-dots"></span></p>
+                            <p class="text-xs text-gray-400 mt-1 mb-4">基于你的故事生成针对性回答...</p>
+                            <div class="w-full max-w-xs mx-auto loading-bar"></div>
+                        </div>
+
+                        <!-- 答案展示 -->
+                        <div id="recAnswer" class="hidden card rounded-2xl p-5 shadow-sm fade-up">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
+                                        <span class="text-sm">🎤</span>
+                                    </div>
+                                    <h2 class="text-sm font-semibold text-gray-700">口语稿: <span id="answerCategory" class="text-violet-600"></span></h2>
+                                    <span id="answerWordCount" class="text-xs text-gray-400"></span>
+                                </div>
+                                <div class="flex gap-1.5">
+                                    <button id="answerSpeakBtn" onclick="speakAnswer(this)" class="speak-btn btn-action text-xs px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 font-medium">🔊 朗读</button>
+                                    <button onclick="copyAnswer()" class="btn-action text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 font-medium">📋 复制</button>
+                                    <button onclick="archiveCurrentAnswer()" class="btn-action text-xs px-3 py-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 font-medium">⭐ 收藏</button>
+                                </div>
+                            </div>
+                            <div id="answerTimeline" class="max-h-[calc(100vh-300px)] overflow-y-auto pr-1"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== 页面三：故事库 ==================== -->
+            <div id="page-stories" class="page-container">
+                <div class="card rounded-2xl p-5 shadow-sm">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
                             <div class="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
-                                <span class="text-sm">🎯</span>
+                                <span class="text-sm">📚</span>
                             </div>
                             <div>
-                                <h2 class="text-sm font-semibold text-gray-700">这个故事可以串的题目</h2>
-                                <p class="text-xs text-gray-400 mt-0.5">AI 从 63 道题库中为你精选了最匹配的题目</p>
+                                <h2 class="text-sm font-semibold text-gray-700">我的故事库</h2>
+                                <p class="text-xs text-gray-400 mt-0.5">目标：10-20 个高质量个人故事</p>
                             </div>
                         </div>
-                        <div class="flex gap-2">
-                            <button onclick="saveStory()" class="btn-secondary px-3 py-1.5 rounded-lg text-xs font-medium btn-action">💾 保存故事</button>
-                            <button onclick="goBackToDecompose()" class="btn-ghost text-xs">← 修改拆解</button>
+                        <div class="encourage-hint p-3 hidden md:block">
+                            <p class="text-xs text-blue-700">💡 每个故事都可以串 3 道以上的 Part 2 题目</p>
                         </div>
                     </div>
-                    <div id="recommendGrid" class="space-y-2.5"></div>
+
+                    <!-- 未登录提示 -->
+                    <div id="storiesLoginHint" class="placeholder-panel" style="min-height: 200px;">
+                        <div class="placeholder-icon" style="font-size: 32px;">🔒</div>
+                        <p class="text-xs text-gray-400">请先登录以查看故事库</p>
+                    </div>
+
+                    <!-- 空状态 -->
+                    <div id="storiesEmpty" class="hidden placeholder-panel" style="min-height: 200px;">
+                        <div class="placeholder-icon" style="font-size: 32px;">📭</div>
+                        <p class="text-sm text-gray-400 font-medium">暂无保存的故事</p>
+                        <p class="text-xs text-gray-300 mt-2">去「串题」页分解故事后保存到这里</p>
+                    </div>
+
+                    <!-- 故事卡片网格 -->
+                    <div id="storiesGrid" class="hidden story-grid"></div>
                 </div>
+            </div>
 
-                <!-- 手动选题（折叠） -->
-                <section class="card rounded-2xl overflow-hidden mb-5 shadow-sm">
-                    <div class="p-4 cursor-pointer flex items-center justify-between" onclick="toggleManualTopics()">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm">📋</span>
-                            <span class="text-xs font-semibold text-gray-700">手动选题生成</span>
-                            <span class="text-xs text-gray-400">从完整题库中自行选择</span>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400 transition-transform duration-300" id="manualChevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </div>
-                    <div id="manualTopicSection" class="dropdown-content px-4 pb-4">
-                        <div id="topicGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 max-h-52 overflow-y-auto pr-1"></div>
-                    </div>
-                </section>
-            </section>
+        </main>
 
-            <!-- Step 4: 答案展示 -->
-            <section id="answerSection" class="hidden card rounded-2xl p-5 mb-5 shadow-sm fade-up">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center">
-                            <span class="text-sm">🎤</span>
-                        </div>
-                        <h2 class="text-sm font-semibold text-gray-700">口语稿: <span id="answerCategory" class="text-violet-600"></span></h2>
-                        <span id="answerWordCount" class="text-xs text-gray-400"></span>
-                    </div>
-                    <div class="flex gap-1.5">
-                        <button id="answerSpeakBtn" onclick="speakAnswer(this)" class="speak-btn btn-action text-xs px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 font-medium">🔊 朗读</button>
-                        <button onclick="copyAnswer()" class="btn-action text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 font-medium">📋 复制</button>
-                    </div>
-                </div>
-                <div id="answerTimeline"></div>
-            </section>
-
-            <footer class="mt-8 text-center">
-                <p class="text-xs text-gray-400">
-                    📖 用真实故事构建口语素材库 · 自然表达 > 完美匹配 · Band 6.5-7.0
-                </p>
-            </footer>
-        </div>
+        <footer class="mt-8 pb-8 text-center">
+            <p class="text-xs text-gray-400">
+                📖 用真实故事构建口语素材库 · 自然表达 > 完美匹配 · Band 6.5-7.0
+            </p>
+        </footer>
     </div>
 
-    <!-- 登录/注册弹窗 -->
+    <!-- ===== 登录/注册弹窗 ===== -->
     <div id="authModal" class="modal-overlay" onclick="if(event.target===this)closeAuthModal()">
         <div class="modal-box">
             <div class="flex items-center justify-between mb-5">
@@ -369,24 +493,35 @@
         </div>
     </div>
 
-    <!-- 故事库侧边栏 -->
-    <div id="storyBackdrop" class="history-backdrop" onclick="toggleStorySidebar()"></div>
-    <div id="storySidebar" class="history-sidebar">
-        <div class="p-5">
+    <!-- ===== 故事详情弹窗 ===== -->
+    <div id="storyDetailModal" class="modal-overlay" onclick="if(event.target===this)closeStoryDetail()">
+        <div class="modal-box modal-box-lg">
+            <div class="flex items-center justify-between mb-5">
+                <h3 id="storyDetailTitle" class="text-base font-semibold text-gray-800">故事详情</h3>
+                <button onclick="closeStoryDetail()" class="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+            </div>
+            <div id="storyDetailContent"></div>
+        </div>
+    </div>
+
+    <!-- ===== 公告弹窗 ===== -->
+    <div id="announcementModal" class="modal-overlay" onclick="if(event.target===this)closeAnnouncement()">
+        <div class="modal-box">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-semibold text-gray-800">📚 我的故事库</h3>
-                <button onclick="toggleStorySidebar()" class="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+                <h3 class="text-base font-semibold text-gray-800">🎉 更新公告</h3>
+                <button onclick="closeAnnouncement()" class="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
             </div>
-            <div class="encourage-hint p-3 mb-4">
-                <p class="text-xs text-blue-700 leading-relaxed">💡 目标：建立 10-20 个高质量个人故事，让你面对任何 Part 2 题目都有内容可讲。</p>
-            </div>
-            <div id="storyList" class="space-y-2 max-h-[calc(100vh-160px)] overflow-y-auto pr-1">
-                <p class="text-xs text-gray-400 text-center py-8">暂无保存的故事</p>
-            </div>
+            <div id="announcementContent" class="text-sm text-gray-600 leading-relaxed"></div>
+            <button onclick="closeAnnouncement()" class="btn-main w-full py-2.5 rounded-xl text-sm font-semibold text-white mt-5">知道了</button>
         </div>
     </div>
 
     <script>
+    // ========================================
+    // 常量
+    // ========================================
+    const APP_VERSION = 'v2.0.0';
+
     // ========================================
     // Supabase 配置
     // ========================================
@@ -401,7 +536,7 @@
     }
 
     // ========================================
-    // 题库（手动选题用，保持原有数据）
+    // 题库（手动选题用）
     // ========================================
     const TOPICS = [
         { cn: "重要决定", en: "Describe an important decision that you made", category: "event", isNew: true },
@@ -467,17 +602,52 @@
     ];
 
     // ========================================
-    // 状态变量
+    // 全局状态
     // ========================================
-    let currentUser = null;
-    let authMode = 'login';
-    let currentDecomposition = null;  // 当前拆解结果
-    let currentRawText = '';           // 当前故事原文
-    let currentStoryId = null;         // 当前故事 ID（已保存的）
-    let currentCategories = [];        // 当前映射的类别
-    let currentRecommendations = [];   // 当前推荐的串题题目
-    let currentAnswer = null;          // 当前生成的答案
-    let currentUtterance = null;       // 当前朗读的 utterance
+    const state = {
+        currentUser: null,
+        currentPage: 'home',
+        decompositionData: null,
+        recommendations: [],
+        selectedTopic: null,
+        currentAnswer: null,
+        storiesList: [],
+        currentRawText: '',
+        currentStoryId: null,
+        currentUtterance: null
+    };
+
+    // 兼容旧代码中直接引用的变量
+    Object.defineProperty(window, 'currentUser', {
+        get: () => state.currentUser,
+        set: (v) => { state.currentUser = v; }
+    });
+    Object.defineProperty(window, 'currentDecomposition', {
+        get: () => state.decompositionData,
+        set: (v) => { state.decompositionData = v; }
+    });
+    Object.defineProperty(window, 'currentRawText', {
+        get: () => state.currentRawText,
+        set: (v) => { state.currentRawText = v; }
+    });
+    Object.defineProperty(window, 'currentStoryId', {
+        get: () => state.currentStoryId,
+        set: (v) => { state.currentStoryId = v; }
+    });
+    Object.defineProperty(window, 'currentRecommendations', {
+        get: () => state.recommendations,
+        set: (v) => { state.recommendations = v; }
+    });
+    Object.defineProperty(window, 'currentAnswer', {
+        get: () => state.currentAnswer,
+        set: (v) => { state.currentAnswer = v; }
+    });
+    Object.defineProperty(window, 'currentUtterance', {
+        get: () => state.currentUtterance,
+        set: (v) => { state.currentUtterance = v; }
+    });
+
+    let currentCategories = [];
 
     const TEMPLATES = [
         'Last summer, I traveled to a small mountain town with my best friend. We got completely lost because there was no signal and we could not read the map properly. We had to ask a local farmer for directions, and he ended up inviting us to his home for tea. It was scary at first but turned into one of the most memorable experiences of my life.',
@@ -485,32 +655,51 @@
         'When I was about seven, my parents sent me to an art class. I was terrible at drawing and the teacher always criticized my work. I felt really frustrated and wanted to quit. But my mom encouraged me to keep trying. After a few months, I drew a picture of my family that the teacher actually praised. That was the moment I realized persistence pays off.'
     ];
 
-    const ENCOURAGEMENTS = [
-        '每个真实故事都值得被记住。把它变成你的口语素材吧！',
-        '今天的经历就是明天的 Part 2 答案。',
-        '你不需要编故事 — 你只需要学会讲自己的故事。',
-        '10 个好故事 > 50 个硬套答案。',
-        '讲你记得的细节，而不是背你写的句子。',
-        '每个故事都有 3 个以上的用途，AI 帮你找到它们。',
-        'Part 2 高分秘诀：真实感 + 流利度 > 词汇难度',
-        '你的故事库里已经有多少个故事了？目标：10-20 个！'
-    ];
-
     // ========================================
     // 初始化
     // ========================================
     document.addEventListener('DOMContentLoaded', () => {
         initAuth();
-        initMoodCard();
         renderTopicGrid();
+        checkAnnouncement();
+
         const storyInput = document.getElementById('storyInput');
         storyInput.addEventListener('input', checkDecomposeBtn);
         storyInput.addEventListener('compositionend', checkDecomposeBtn);
     });
 
     // ========================================
+    // 页面导航
+    // ========================================
+    function navigateTo(page) {
+        state.currentPage = page;
+
+        // 切换页面容器
+        document.querySelectorAll('.page-container').forEach(el => el.classList.remove('active'));
+        document.getElementById(`page-${page}`).classList.add('active');
+
+        // 切换导航标签
+        document.querySelectorAll('.nav-tab').forEach(el => {
+            el.classList.toggle('active', el.dataset.page === page);
+        });
+
+        // 页面进入逻辑
+        if (page === 'stories') {
+            loadStoriesPage();
+        }
+        if (page === 'recommend' && state.recommendations.length === 0) {
+            // 无推荐数据，显示占位
+            document.getElementById('recEmptyPlaceholder').classList.remove('hidden');
+            document.getElementById('recTopicList').innerHTML = '';
+            document.getElementById('recManualSection').classList.add('hidden');
+        }
+    }
+
+    // ========================================
     // 认证系统
     // ========================================
+    let authMode = 'login';
+
     async function initAuth() {
         if (!sbClient) {
             const authBtn = document.getElementById('authBtn');
@@ -530,25 +719,25 @@
 
     function updateAuthUI() {
         const authBtn = document.getElementById('authBtn');
-        const storyLibBtn = document.getElementById('storyLibBtn');
         if (!authBtn) return;
 
         if (currentUser) {
             const email = currentUser.email || '用户';
-            authBtn.innerHTML = `<span class="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 text-white text-xs flex items-center justify-center font-semibold">${email.charAt(0).toUpperCase()}</span>`;
+            authBtn.innerHTML = `<span class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 text-white text-xs flex items-center justify-center font-semibold">${email.charAt(0).toUpperCase()}</span>`;
             authBtn.onclick = (e) => { e.stopPropagation(); document.getElementById('userMenu').classList.toggle('show'); };
-            if (storyLibBtn) storyLibBtn.classList.remove('hidden');
-            loadStoryList();
         } else {
             if (sbClient) { authBtn.innerHTML = '登录 / 注册'; authBtn.onclick = () => openAuthModal(); authBtn.style.display = ''; }
             else { authBtn.style.display = 'none'; }
-            if (storyLibBtn) storyLibBtn.classList.add('hidden');
             document.getElementById('userMenu').classList.remove('show');
         }
         checkDecomposeBtn();
     }
 
     function handleAuthBtnClick() { openAuthModal(); }
+
+    function closeUserMenu() {
+        document.getElementById('userMenu').classList.remove('show');
+    }
 
     function openAuthModal() {
         document.getElementById('authModal').classList.add('show');
@@ -615,37 +804,16 @@
     }
 
     function showError(msg) {
-        document.getElementById('errorMessage').textContent = msg;
-        document.getElementById('errorSection').classList.remove('hidden');
-    }
-
-    function hideAll() {
-        ['loadingSection', 'errorSection', 'decomposeSection', 'recommendSection', 'answerSection'].forEach(id => {
-            document.getElementById(id).classList.add('hidden');
-        });
-    }
-
-    function setStep(n) {
-        for (let i = 1; i <= 3; i++) {
-            const el = document.getElementById(`step${i}`);
-            if (!el) continue;
-            el.classList.remove('active', 'done');
-            if (i < n) el.classList.add('done');
-            else if (i === n) el.classList.add('active');
-        }
-    }
-
-    function showLoading(title, sub, step) {
-        hideAll();
-        document.getElementById('loadingTitle').innerHTML = title;
-        document.getElementById('loadingSub').textContent = sub;
-        if (step) setStep(step);
-        document.getElementById('loadingSection').classList.remove('hidden');
+        document.getElementById('homeErrorMessage').textContent = msg;
+        document.getElementById('homeError').classList.remove('hidden');
+        document.getElementById('homePlaceholder').classList.add('hidden');
+        document.getElementById('homeLoading').classList.add('hidden');
+        document.getElementById('homeDecompose').classList.add('hidden');
     }
 
     function _speak(script, btn) {
-        if (currentUtterance && speechSynthesis.speaking) {
-            speechSynthesis.cancel(); currentUtterance = null;
+        if (state.currentUtterance && speechSynthesis.speaking) {
+            speechSynthesis.cancel(); state.currentUtterance = null;
             btn.classList.remove('speaking'); btn.innerHTML = '🔊 朗读'; return;
         }
         const u = new SpeechSynthesisUtterance(script);
@@ -653,15 +821,10 @@
         const v = speechSynthesis.getVoices();
         const ev = v.find(x => x.lang.startsWith('en') && x.name.includes('Female')) || v.find(x => x.lang.startsWith('en'));
         if (ev) u.voice = ev;
-        currentUtterance = u;
+        state.currentUtterance = u;
         btn.classList.add('speaking'); btn.innerHTML = '⏹ 停止';
-        u.onend = u.onerror = () => { btn.classList.remove('speaking'); btn.innerHTML = '🔊 朗读'; currentUtterance = null; };
+        u.onend = u.onerror = () => { btn.classList.remove('speaking'); btn.innerHTML = '🔊 朗读'; state.currentUtterance = null; };
         speechSynthesis.speak(u);
-    }
-
-    function initMoodCard() {
-        const text = ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)];
-        document.getElementById('moodText').textContent = text;
     }
 
     function fillTemplate(i) {
@@ -671,13 +834,20 @@
 
     function clearStoryInput() {
         document.getElementById('storyInput').value = '';
-        currentDecomposition = null;
-        currentRawText = '';
-        currentStoryId = null;
+        state.decompositionData = null;
+        state.currentRawText = '';
+        state.currentStoryId = null;
+        state.currentAnswer = null;
+        state.recommendations = [];
+        state.selectedTopic = null;
         currentCategories = [];
-        currentRecommendations = [];
-        currentAnswer = null;
-        hideAll();
+
+        // 重置主页右栏
+        resetHomeRightPanel();
+        // 重置推荐页
+        resetRecommendPage();
+        // 重置进度
+        setProgress(1, '等待输入...');
         checkDecomposeBtn();
     }
 
@@ -695,19 +865,48 @@
     }
 
     // ========================================
-    // Step 1: 故事输入 → 拆解
+    // 主页右栏状态管理
+    // ========================================
+    function resetHomeRightPanel() {
+        document.getElementById('homePlaceholder').classList.remove('hidden');
+        document.getElementById('homeLoading').classList.add('hidden');
+        document.getElementById('homeError').classList.add('hidden');
+        document.getElementById('homeDecompose').classList.add('hidden');
+    }
+
+    function setProgress(step, statusText) {
+        for (let i = 1; i <= 3; i++) {
+            const el = document.getElementById(`progressStep${i}`);
+            if (!el) continue;
+            el.classList.remove('active', 'done');
+            if (i < step) el.classList.add('done');
+            else if (i === step) el.classList.add('active');
+        }
+        if (statusText) document.getElementById('progressStatus').textContent = statusText;
+    }
+
+    // 保留旧 setStep 兼容
+    function setStep(n) { setProgress(n, ''); }
+
+    // ========================================
+    // 页面一：故事拆解
     // ========================================
     async function startDecompose() {
         const rawText = document.getElementById('storyInput').value.trim();
         if (rawText.length < 10) return;
         if (!currentUser) { showToast('请先登录', 'error'); return; }
 
-        currentRawText = rawText;
-        currentDecomposition = null;
-        currentStoryId = null;
-        currentAnswer = null;
+        state.currentRawText = rawText;
+        state.decompositionData = null;
+        state.currentStoryId = null;
+        state.currentAnswer = null;
 
-        showLoading('AI 正在拆解你的故事<span class="loading-dots"></span>', '分析经历、提取维度...', 1);
+        // 显示加载
+        document.getElementById('homePlaceholder').classList.add('hidden');
+        document.getElementById('homeError').classList.add('hidden');
+        document.getElementById('homeDecompose').classList.add('hidden');
+        document.getElementById('homeLoading').classList.remove('hidden');
+        setProgress(1, 'AI 正在拆解...');
 
         try {
             const token = (await sbClient.auth.getSession()).data.session?.access_token;
@@ -726,19 +925,20 @@
                 return;
             }
 
-            currentDecomposition = data.decomposition;
+            state.decompositionData = data.decomposition;
             showDecompositionForm(data.decomposition);
+            setProgress(2, '拆解完成，等待确认...');
         } catch (err) {
             showError('网络错误，请稍后重试');
             console.error(err);
         }
     }
 
-    // ========================================
-    // Step 2: 展示拆解结果（可编辑）
-    // ========================================
     function showDecompositionForm(dec) {
-        hideAll();
+        document.getElementById('homeLoading').classList.add('hidden');
+        document.getElementById('homeError').classList.add('hidden');
+        document.getElementById('homePlaceholder').classList.add('hidden');
+
         const form = document.getElementById('decomposeForm');
 
         const textareaFields = [
@@ -777,7 +977,7 @@
         });
 
         form.innerHTML = html;
-        document.getElementById('decomposeSection').classList.remove('hidden');
+        document.getElementById('homeDecompose').classList.remove('hidden');
 
         // 实时更新 tags 展示
         tagFields.forEach(f => {
@@ -801,24 +1001,29 @@
     }
 
     function goBackToInput() {
-        hideAll();
-        document.getElementById('storyInputSection').classList.remove('hidden');
+        resetHomeRightPanel();
+        setProgress(1, '等待输入...');
     }
 
     // ========================================
-    // Step 2→3: 确认拆解 → 推荐串题题目
+    // 确认拆解 → 推荐串题题目 → 切换到推荐页
     // ========================================
-    async function confirmDecompositionAndRecommend() {
-        currentDecomposition = collectDecompositionFromForm();
+    async function confirmAndRecommend() {
+        state.decompositionData = collectDecompositionFromForm();
 
-        showLoading('AI 正在为你推荐串题题目<span class="loading-dots"></span>', '从 63 道题库中匹配最适合的...', 2);
+        // 显示加载状态（在主页右栏）
+        document.getElementById('homeDecompose').classList.add('hidden');
+        document.getElementById('homeLoading').classList.remove('hidden');
+        document.getElementById('homeLoading').querySelector('p').innerHTML = 'AI 正在推荐串题题目<span class="loading-dots"></span>';
+        document.getElementById('homeLoading').querySelector('.text-xs').textContent = '从 63 道题库中匹配最适合的...';
+        setProgress(2, '正在推荐题目...');
 
         try {
             const token = (await sbClient.auth.getSession()).data.session?.access_token;
             const res = await fetch('/api/recommend-topics', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ decomposition: currentDecomposition })
+                body: JSON.stringify({ decomposition: state.decompositionData })
             });
 
             const data = await res.json();
@@ -828,8 +1033,10 @@
                 return;
             }
 
-            currentRecommendations = data.recommendations;
-            showRecommendations(data.recommendations, data.total_topics);
+            state.recommendations = data.recommendations;
+            renderRecommendPage(data.recommendations);
+            navigateTo('recommend');
+            setProgress(3, '推荐完成，点击题目生成稿子');
         } catch (err) {
             showError('网络错误，请稍后重试');
             console.error(err);
@@ -837,49 +1044,63 @@
     }
 
     // ========================================
-    // Step 3: 展示推荐串题题目
+    // 页面二：渲染推荐页
     // ========================================
-    function showRecommendations(recommendations, totalTopics) {
-        hideAll();
-        const grid = document.getElementById('recommendGrid');
+    function renderRecommendPage(recommendations) {
+        document.getElementById('recEmptyPlaceholder').classList.add('hidden');
+        document.getElementById('recManualSection').classList.remove('hidden');
 
-        grid.innerHTML = recommendations.map((r, i) => `
-            <div class="recommend-card card rounded-xl p-4 cursor-pointer hover:border-violet-300 hover:shadow-md transition-all" id="recCard_${i}" onclick="generateForRecommendation(${i})">
-                <div class="flex items-start justify-between gap-3">
+        const list = document.getElementById('recTopicList');
+        list.innerHTML = recommendations.map((r, i) => `
+            <div class="recommend-card card rounded-xl p-3 cursor-pointer" id="recCard_${i}" onclick="onTopicClick(${i})">
+                <div class="flex items-start gap-2">
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-                            <span class="text-sm font-semibold text-gray-800">${r.topic_cn}</span>
-                            <span class="category-badge ${r.confidence === 'high' ? 'badge-high' : 'badge-medium'}">${r.confidence === 'high' ? '高匹配' : '可适配'}</span>
+                        <div class="flex items-center gap-1.5 mb-1 flex-wrap">
+                            <span class="text-xs font-semibold text-gray-800">${r.topic_cn}</span>
+                            <span class="category-badge ${r.confidence === 'high' ? 'badge-high' : 'badge-medium'}">${r.confidence === 'high' ? '高' : '中'}</span>
                         </div>
-                        <p class="text-xs text-gray-500 leading-relaxed mb-1.5 italic">"${r.topic_en}"</p>
-                        <p class="text-xs text-gray-400 leading-relaxed mb-2">${r.reason}</p>
-                        <p class="text-xs text-violet-600 leading-relaxed">💡 角度：${r.angle}</p>
+                        <p class="text-[10px] text-violet-600 leading-relaxed">💡 ${r.angle}</p>
                     </div>
-                    <button class="btn-main px-3 py-1.5 rounded-lg text-xs font-medium text-white flex-shrink-0 mt-1 btn-action" onclick="event.stopPropagation(); generateForRecommendation(${i})">✍️ 串题</button>
+                    <button class="btn-main px-2.5 py-1 rounded-lg text-[11px] font-medium text-white flex-shrink-0 btn-action" onclick="event.stopPropagation(); onTopicClick(${i})">✍️</button>
                 </div>
             </div>
         `).join('');
 
-        document.getElementById('recommendSection').classList.remove('hidden');
-        setStep(2);
+        // 显示保存按钮
+        document.getElementById('saveStoryBtn').classList.remove('hidden');
     }
 
-    function goBackToDecompose() {
-        hideAll();
-        showDecompositionForm(currentDecomposition);
+    function resetRecommendPage() {
+        document.getElementById('recEmptyPlaceholder').classList.remove('hidden');
+        document.getElementById('recTopicList').innerHTML = '';
+        document.getElementById('recManualSection').classList.add('hidden');
+        document.getElementById('saveStoryBtn').classList.add('hidden');
+        document.getElementById('recPlaceholder').classList.remove('hidden');
+        document.getElementById('recLoading').classList.add('hidden');
+        document.getElementById('recAnswer').classList.add('hidden');
+        state.recommendations = [];
+        state.selectedTopic = null;
+        state.currentAnswer = null;
     }
 
     // ========================================
-    // Step 3→4: 点击推荐题目 → 生成答案
+    // 点击推荐题目 → 生成答案
     // ========================================
-    async function generateForRecommendation(index) {
-        const rec = currentRecommendations[index];
-        if (!rec || !currentDecomposition) return;
+    async function onTopicClick(index) {
+        const rec = state.recommendations[index];
+        if (!rec || !state.decompositionData) return;
 
-        const card = document.getElementById(`recCard_${index}`);
-        card.classList.add('generating');
-        card.style.opacity = '0.6';
-        card.querySelector('button').textContent = '⏳ 生成中...';
+        state.selectedTopic = rec;
+
+        // 高亮选中卡片
+        document.querySelectorAll('#recTopicList .recommend-card').forEach((c, i) => {
+            c.classList.toggle('selected', i === index);
+        });
+
+        // 显示加载
+        document.getElementById('recPlaceholder').classList.add('hidden');
+        document.getElementById('recAnswer').classList.add('hidden');
+        document.getElementById('recLoading').classList.remove('hidden');
 
         try {
             const token = (await sbClient.auth.getSession()).data.session?.access_token;
@@ -887,35 +1108,33 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
-                    decomposition: currentDecomposition,
+                    decomposition: state.decompositionData,
                     category: rec.topic_cn,
                     angle: rec.angle,
                     topic_en: rec.topic_en,
-                    story_id: currentStoryId
+                    story_id: state.currentStoryId
                 })
             });
 
             const data = await res.json();
             if (!res.ok || !data.success) {
                 showToast(data.error || '生成失败', 'error');
-                card.style.opacity = '1';
-                card.querySelector('button').textContent = '✍️ 串题';
+                document.getElementById('recLoading').classList.add('hidden');
+                document.getElementById('recPlaceholder').classList.remove('hidden');
                 return;
             }
 
-            currentAnswer = data.answer;
-            showAnswer(data.answer, `${rec.topic_cn} — ${rec.topic_en}`);
+            state.currentAnswer = data.answer;
+            showAnswerInRightPanel(data.answer, `${rec.topic_cn} — ${rec.topic_en}`);
         } catch (err) {
             showToast('网络错误', 'error');
-            card.style.opacity = '1';
-            card.querySelector('button').textContent = '✍️ 串题';
+            document.getElementById('recLoading').classList.add('hidden');
+            document.getElementById('recPlaceholder').classList.remove('hidden');
         }
     }
 
-    // ========================================
-    // Step 4: 展示答案（时间线）
-    // ========================================
-    function showAnswer(answer, category) {
+    function showAnswerInRightPanel(answer, category) {
+        document.getElementById('recLoading').classList.add('hidden');
         document.getElementById('answerCategory').textContent = category;
         document.getElementById('answerWordCount').textContent = `≈ ${answer.word_count || '?'} 词`;
 
@@ -977,18 +1196,18 @@
         `;
 
         document.getElementById('answerTimeline').innerHTML = html;
-        document.getElementById('answerSection').classList.remove('hidden');
-        document.getElementById('answerSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        setStep(3);
+        document.getElementById('recAnswer').classList.remove('hidden');
+        document.getElementById('recAnswer').classList.add('fade-up');
+    }
 
-        // 恢复推荐卡片状态
-        document.querySelectorAll('.recommend-card').forEach(c => { c.style.opacity = '1'; });
-        // 恢复手动选题卡片状态（无特殊样式需恢复）
+    // 兼容旧代码 showAnswer
+    function showAnswer(answer, category) {
+        showAnswerInRightPanel(answer, category);
     }
 
     function getAnswerFullText() {
-        if (!currentAnswer) return '';
-        const a = currentAnswer;
+        if (!state.currentAnswer) return '';
+        const a = state.currentAnswer;
         return [a.intro, a.past?.description, a.past?.feeling, a.present?.description, a.present?.feeling, a.future?.description, a.future?.feeling, a.outro].filter(Boolean).join('\n\n');
     }
 
@@ -1001,6 +1220,25 @@
         const text = getAnswerFullText();
         if (!text) return;
         navigator.clipboard.writeText(text).then(() => showToast('已复制完整口语稿 ✓', 'success')).catch(() => showToast('复制失败', 'error'));
+    }
+
+    // 收藏当前答案
+    async function archiveCurrentAnswer() {
+        if (!currentUser || !state.currentStoryId) {
+            showToast('请先保存故事后再收藏', 'error');
+            return;
+        }
+        try {
+            const token = (await sbClient.auth.getSession()).data.session?.access_token;
+            const res = await fetch('/api/save-archive', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ story_id: state.currentStoryId, note: state.selectedTopic?.topic_cn || '' })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) { showToast(data.error || '收藏失败', 'error'); return; }
+            showToast('已收藏 ⭐', 'success');
+        } catch (err) { showToast('网络错误', 'error'); }
     }
 
     // ========================================
@@ -1026,12 +1264,18 @@
 
     async function generateForTopic(index) {
         const topic = TOPICS[index];
-        if (!topic || !currentDecomposition) {
+        if (!topic || !state.decompositionData) {
             showToast('请先输入故事并完成拆解', 'error');
             return;
         }
 
-        showLoading(`AI 正在为「${topic.cn}」生成口语稿<span class="loading-dots"></span>`, '基于当前故事生成针对性回答...', 3);
+        // 切换到推荐页（如果不在）
+        navigateTo('recommend');
+
+        // 显示加载
+        document.getElementById('recPlaceholder').classList.add('hidden');
+        document.getElementById('recAnswer').classList.add('hidden');
+        document.getElementById('recLoading').classList.remove('hidden');
 
         try {
             const token = (await sbClient.auth.getSession()).data.session?.access_token;
@@ -1039,38 +1283,46 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
-                    decomposition: currentDecomposition,
+                    decomposition: state.decompositionData,
                     category: topic.cn,
                     angle: `Use the story to answer this IELTS Part 2 question naturally`,
                     topic_en: topic.en,
-                    story_id: currentStoryId
+                    story_id: state.currentStoryId
                 })
             });
 
             const data = await res.json();
-            if (!res.ok || !data.success) { showError(data.error || '生成失败'); return; }
+            if (!res.ok || !data.success) {
+                showToast(data.error || '生成失败', 'error');
+                document.getElementById('recLoading').classList.add('hidden');
+                document.getElementById('recPlaceholder').classList.remove('hidden');
+                return;
+            }
 
-            currentAnswer = data.answer;
-            showAnswer(data.answer, `${topic.cn} — ${topic.en}`);
+            state.currentAnswer = data.answer;
+            state.selectedTopic = { topic_cn: topic.cn, topic_en: topic.en };
+            showAnswerInRightPanel(data.answer, `${topic.cn} — ${topic.en}`);
         } catch (err) {
-            showError('网络错误，请稍后重试');
+            showToast('网络错误', 'error');
+            document.getElementById('recLoading').classList.add('hidden');
+            document.getElementById('recPlaceholder').classList.remove('hidden');
         }
     }
 
     // ========================================
-    // 故事库 CRUD
+    // 故事库 CRUD（保留原有逻辑）
     // ========================================
     async function saveStory() {
         if (!currentUser) { showToast('请先登录', 'error'); return; }
-        if (!currentDecomposition) { showToast('没有可保存的故事', 'error'); return; }
+        if (!state.decompositionData) { showToast('没有可保存的故事', 'error'); return; }
 
-        const title = currentDecomposition.summary || '未命名故事';
+        const title = state.decompositionData.summary || '未命名故事';
         try {
             const token = (await sbClient.auth.getSession()).data.session?.access_token;
-            const method = currentStoryId ? 'PATCH' : 'POST';
-            const body = currentStoryId
-                ? { story_id: currentStoryId, title, decomposition: currentDecomposition, tags: [] }
-                : { title, raw_text: currentRawText, decomposition: currentDecomposition, categories: currentCategories.map(c => c.category) };
+            const method = state.currentStoryId ? 'PATCH' : 'POST';
+            const body = state.currentStoryId
+                ? { story_id: state.currentStoryId, title, decomposition: state.decompositionData, tags: [] }
+                : { title, raw_text: state.currentRawText, decomposition: state.decompositionData, categories: currentCategories.map(c => c.category) };
 
             const res = await fetch('/api/stories', {
                 method,
@@ -1081,16 +1333,30 @@
             const data = await res.json();
             if (!res.ok || !data.success) { showToast(data.error || '保存失败', 'error'); return; }
 
-            if (!currentStoryId) currentStoryId = data.story_id;
+            if (!state.currentStoryId) state.currentStoryId = data.story_id;
             showToast('已保存到故事库 ✓', 'success');
-            loadStoryList();
         } catch (err) {
             showToast('网络错误', 'error');
         }
     }
 
-    async function loadStoryList() {
-        if (!currentUser) return;
+    // ========================================
+    // 页面三：故事库
+    // ========================================
+    async function loadStoriesPage() {
+        const loginHint = document.getElementById('storiesLoginHint');
+        const emptyHint = document.getElementById('storiesEmpty');
+        const grid = document.getElementById('storiesGrid');
+
+        if (!currentUser) {
+            loginHint.classList.remove('hidden');
+            emptyHint.classList.add('hidden');
+            grid.classList.add('hidden');
+            return;
+        }
+
+        loginHint.classList.add('hidden');
+
         try {
             const token = (await sbClient.auth.getSession()).data.session?.access_token;
             const res = await fetch('/api/stories', {
@@ -1099,40 +1365,40 @@
             const data = await res.json();
             if (!data.success) return;
 
-            const stories = data.stories || [];
-            const badge = document.getElementById('storyCountBadge');
-            if (badge) {
-                badge.textContent = stories.length;
-                badge.classList.toggle('hidden', stories.length === 0);
-            }
+            state.storiesList = data.stories || [];
+            const stories = state.storiesList;
 
-            const list = document.getElementById('storyList');
             if (stories.length === 0) {
-                list.innerHTML = '<p class="text-xs text-gray-400 text-center py-8">暂无保存的故事</p>';
+                emptyHint.classList.remove('hidden');
+                grid.classList.add('hidden');
                 return;
             }
 
-            list.innerHTML = stories.map(s => `
-                <div class="story-lib-card" onclick="loadSavedStory('${s.id}')">
-                    <div class="flex items-start justify-between gap-2">
-                        <div class="min-w-0">
-                            <p class="text-sm font-semibold text-gray-800 truncate">${s.title}</p>
-                            <p class="text-[11px] text-gray-400 mt-0.5 truncate">${s.preview}</p>
-                        </div>
+            emptyHint.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            grid.innerHTML = stories.map(s => `
+                <div class="story-card" onclick="showStoryDetail('${s.id}')">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <h3 class="text-sm font-semibold text-gray-800 truncate flex-1">${s.title}</h3>
                         <button onclick="event.stopPropagation(); deleteStory('${s.id}')" class="btn-ghost text-xs flex-shrink-0" title="删除">🗑️</button>
                     </div>
-                    <div class="flex flex-wrap gap-1 mt-2">
+                    <p class="text-xs text-gray-400 leading-relaxed line-clamp-2 mb-2">${s.preview}</p>
+                    <div class="flex flex-wrap gap-1 mb-2">
                         ${(s.categories || []).map(c => `<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-violet-50 text-violet-600">${c}</span>`).join('')}
+                        ${(s.tags || []).map(t => `<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-pink-50 text-pink-600">${t}</span>`).join('')}
                     </div>
-                    <p class="text-[10px] text-gray-300 mt-1.5">${new Date(s.created_at).toLocaleDateString('zh-CN')}</p>
+                    <div class="flex items-center justify-between">
+                        <p class="text-[10px] text-gray-300">${new Date(s.created_at).toLocaleDateString('zh-CN')}</p>
+                        <span class="text-[10px] text-violet-400 font-medium cursor-pointer hover:text-violet-600">查看详情 →</span>
+                    </div>
                 </div>
             `).join('');
         } catch (err) { console.error('Load stories error:', err); }
     }
 
-    async function loadSavedStory(storyId) {
-        toggleStorySidebar();
-        showLoading('加载故事<span class="loading-dots"></span>', '正在读取...', 1);
+    async function showStoryDetail(storyId) {
+        if (!currentUser) return;
 
         try {
             const token = (await sbClient.auth.getSession()).data.session?.access_token;
@@ -1140,19 +1406,117 @@
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
-            if (!res.ok || !data.success) { showError('加载失败'); return; }
+            if (!res.ok || !data.success) { showToast('加载失败', 'error'); return; }
 
             const story = data.story;
-            currentStoryId = story.id;
-            currentRawText = story.raw_text;
-            currentDecomposition = story.decomposition;
+            const dec = story.decomposition || {};
+
+            document.getElementById('storyDetailTitle').textContent = story.title;
+
+            const textareaFields = [
+                { key: 'summary', label: '📝 概述', emoji: '📝' },
+                { key: 'past', label: '⏪ 过去', emoji: '⏪' },
+                { key: 'present', label: '🎯 现在', emoji: '🎯' },
+                { key: 'future', label: '🚀 未来', emoji: '🚀' }
+            ];
+            const tagFields = [
+                { key: 'people', label: '👥 人物', emoji: '👥' },
+                { key: 'places', label: '📍 地点', emoji: '📍' },
+                { key: 'challenges', label: '⚡ 挑战', emoji: '⚡' },
+                { key: 'decisions', label: '🔀 决定', emoji: '🔀' },
+                { key: 'achievements', label: '🏆 成就', emoji: '🏆' },
+                { key: 'skills', label: '🛠️ 技能', emoji: '🛠️' },
+                { key: 'emotions', label: '💭 情绪', emoji: '💭' },
+                { key: 'lessons', label: '📖 启示', emoji: '📖' }
+            ];
+
+            let html = '';
+
+            // 原文
+            if (story.raw_text) {
+                html += `
+                    <div class="mb-4">
+                        <h4 class="text-xs font-semibold text-gray-700 mb-2">📄 故事原文</h4>
+                        <div class="p-3 bg-gray-50 rounded-xl text-xs text-gray-600 leading-relaxed">${story.raw_text}</div>
+                    </div>
+                `;
+            }
+
+            // 文本维度
+            textareaFields.forEach(f => {
+                if (dec[f.key]) {
+                    html += `
+                        <div class="mb-3">
+                            <h4 class="text-xs font-semibold text-gray-700 mb-1">${f.label}</h4>
+                            <p class="text-xs text-gray-600 leading-relaxed">${dec[f.key]}</p>
+                        </div>
+                    `;
+                }
+            });
+
+            // 标签维度
+            const tagHtml = tagFields
+                .filter(f => dec[f.key] && dec[f.key].length > 0)
+                .map(f => `
+                    <div class="mb-2">
+                        <span class="text-xs font-semibold text-gray-700">${f.label}</span>
+                        <div class="flex flex-wrap gap-1 mt-1">
+                            ${dec[f.key].map(t => `<span class="text-[11px] px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                `).join('');
+
+            if (tagHtml) {
+                html += `
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <h4 class="text-xs font-semibold text-gray-700 mb-3">维度标签</h4>
+                        ${tagHtml}
+                    </div>
+                `;
+            }
+
+            // 操作按钮
+            html += `
+                <div class="flex gap-2 mt-5 pt-4 border-t border-gray-100">
+                    <button onclick="closeStoryDetail(); useStoryFromLibrary('${storyId}')" class="btn-main px-4 py-2 rounded-xl text-xs font-semibold text-white btn-action">✨ 使用这个故事串题</button>
+                    <button onclick="deleteStory('${storyId}')" class="btn-secondary px-4 py-2 rounded-xl text-xs btn-action">🗑️ 删除</button>
+                </div>
+            `;
+
+            document.getElementById('storyDetailContent').innerHTML = html;
+            document.getElementById('storyDetailModal').classList.add('show');
+        } catch (err) {
+            showToast('加载失败', 'error');
+            console.error(err);
+        }
+    }
+
+    function closeStoryDetail() {
+        document.getElementById('storyDetailModal').classList.remove('show');
+    }
+
+    async function useStoryFromLibrary(storyId) {
+        navigateTo('home');
+
+        try {
+            const token = (await sbClient.auth.getSession()).data.session?.access_token;
+            const res = await fetch(`/api/stories?id=${storyId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) { showToast('加载失败', 'error'); return; }
+
+            const story = data.story;
+            state.currentStoryId = story.id;
+            state.currentRawText = story.raw_text;
+            state.decompositionData = story.decomposition;
 
             document.getElementById('storyInput').value = story.raw_text;
-
-            // 直接显示拆解结果（让用户确认后再推荐）
             showDecompositionForm(story.decomposition);
+            setProgress(2, '已加载，可编辑后推荐串题');
         } catch (err) {
-            showError('网络错误');
+            showToast('加载失败', 'error');
+            console.error(err);
         }
     }
 
@@ -1169,16 +1533,94 @@
 
             if (res.ok) {
                 showToast('已删除', 'info');
-                if (currentStoryId === storyId) { currentStoryId = null; goBackToInput(); }
-                loadStoryList();
+                if (state.currentStoryId === storyId) {
+                    state.currentStoryId = null;
+                    clearStoryInput();
+                }
+                loadStoriesPage();
+                closeStoryDetail();
             }
         } catch (err) { showToast('删除失败', 'error'); }
     }
 
-    function toggleStorySidebar() {
-        document.getElementById('storySidebar').classList.toggle('open');
-        document.getElementById('storyBackdrop').classList.toggle('show');
+    // ========================================
+    // 兼容旧代码的函数名
+    // ========================================
+    async function loadStoryList() { /* 旧侧边栏逻辑已迁移到 loadStoriesPage */ }
+    async function loadSavedStory(storyId) { useStoryFromLibrary(storyId); }
+    function toggleStorySidebar() { navigateTo('stories'); }
+
+    function confirmDecompositionAndRecommend() { confirmAndRecommend(); }
+
+    async function generateForRecommendation(index) { onTopicClick(index); }
+
+    function showRecommendations(recommendations, totalTopics) {
+        renderRecommendPage(recommendations);
     }
+
+    function goBackToDecompose() {
+        navigateTo('home');
+        if (state.decompositionData) {
+            showDecompositionForm(state.decompositionData);
+        }
+    }
+
+    function hideAll() {
+        document.getElementById('homeLoading').classList.add('hidden');
+        document.getElementById('homeError').classList.add('hidden');
+        document.getElementById('homeDecompose').classList.add('hidden');
+    }
+
+    function showLoading(title, sub, step) {
+        document.getElementById('homePlaceholder').classList.add('hidden');
+        document.getElementById('homeError').classList.add('hidden');
+        document.getElementById('homeDecompose').classList.add('hidden');
+        document.getElementById('homeLoading').classList.remove('hidden');
+        document.getElementById('homeLoading').querySelector('p').innerHTML = title;
+        document.getElementById('homeLoading').querySelector('.text-xs').textContent = sub;
+        if (step) setStep(step);
+    }
+
+    // ========================================
+    // 公告系统
+    // ========================================
+    const ANNOUNCEMENT_HTML = `
+        <div class="space-y-3">
+            <p>题链扣 v2.0.0 全面升级！</p>
+            <p><strong>🎨 全新 UI</strong>：左右分栏布局，信息更清晰，操作更流畅</p>
+            <p><strong>📖 独立故事库</strong>：卡片式浏览，一键查看详情、使用已有故事串题</p>
+            <p><strong>🔔 页面导航</strong>：「串题」「推荐」「故事库」三大页面自由切换</p>
+            <p><strong>⭐ 收藏功能</strong>：口语稿支持一键收藏</p>
+            <p>祝你雅思备考顺利，Band 7+ 💪</p>
+        </div>
+    `;
+
+    function checkAnnouncement() {
+        const lastSeen = localStorage.getItem('chaincue_last_seen_version');
+        if (lastSeen !== APP_VERSION) {
+            // 延迟显示，避免页面加载时立即弹出
+            setTimeout(() => showAnnouncement(), 800);
+        }
+    }
+
+    function showAnnouncement() {
+        document.getElementById('announcementContent').innerHTML = ANNOUNCEMENT_HTML;
+        document.getElementById('announcementModal').classList.add('show');
+    }
+
+    function closeAnnouncement() {
+        document.getElementById('announcementModal').classList.remove('show');
+        localStorage.setItem('chaincue_last_seen_version', APP_VERSION);
+    }
+
+    // 点击页面其他地方关闭用户菜单
+    document.addEventListener('click', (e) => {
+        const userMenu = document.getElementById('userMenu');
+        const authBtn = document.getElementById('authBtn');
+        if (userMenu && !userMenu.contains(e.target) && !authBtn.contains(e.target)) {
+            userMenu.classList.remove('show');
+        }
+    });
     </script>
 </body>
 </html>
