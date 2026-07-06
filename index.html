@@ -125,6 +125,7 @@
         .category-badge { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; }
         .badge-high { background: #dcfce7; color: #166534; }
         .badge-medium { background: #fef9c3; color: #854d0e; }
+        .badge-new { background: #fee2e2; color: #dc2626; }
 
         .decompose-field { margin-bottom: 12px; }
         .decompose-field label { display: block; font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 4px; }
@@ -536,46 +537,76 @@
     }
 
     // ========================================
-    // 题库（2026 Q3 新题库，手动选题用）
+    // 题库（2026 年 5-8 月最新雅思口语 Part 2 题库，截止 6.18）
+    // 新题 37 道 + 保留题 27 道 = 64 道
     // ========================================
     const TOPICS = [
-        { cn: "近期改变", en: "Describe a recent change in your life", category: "event" },
-        { cn: "当地新闻", en: "Describe a piece of local news that people are interested in", category: "object" },
-        { cn: "想要颁布的环保法律", en: "Describe an environmental law you would like to see introduced", category: "object" },
-        { cn: "改变重要想法", en: "Describe a time when you changed your mind about something important", category: "event" },
-        { cn: "遇到困难终成功的人", en: "Describe a person who encountered difficulties but eventually succeeded", category: "person" },
-        { cn: "交通拥堵", en: "Describe a time when you were caught in a traffic jam", category: "event" },
-        { cn: "长久目标/抱负", en: "Describe a long-term goal or ambition you have", category: "event" },
-        { cn: "组织快乐活动", en: "Describe a time when you organized a happy event or activity", category: "event" },
-        { cn: "很久没收到回复的信息", en: "Describe a message you sent but did not receive a reply for a long time", category: "object" },
-        { cn: "保护环境的法律", en: "Describe a law about environmental protection", category: "object" },
-        { cn: "花费甚少的外出日", en: "Describe a day out that cost you very little", category: "event" },
-        { cn: "别人帮助解决问题", en: "Describe a time when someone helped you solve a problem", category: "event" },
-        { cn: "包含动物的故事或书", en: "Describe a story or book that includes an animal", category: "object" },
-        { cn: "重要河流/湖泊", en: "Describe an important river or lake in your country", category: "place" },
-        { cn: "语言学习", en: "Describe a language you would like to learn", category: "object" },
-        { cn: "喜欢拜访但不想住的家", en: "Describe a home you like to visit but would not want to live in", category: "place" },
-        { cn: "推荐旅行过的地方", en: "Describe a place you have traveled to that you would recommend", category: "place" },
-        { cn: "名人出演的广告", en: "Describe an advertisement featuring a famous person", category: "object" },
-        { cn: "遇到的科技问题", en: "Describe a technological problem you have encountered", category: "object" },
-        { cn: "擅长学习和说语言的人", en: "Describe a person who is good at learning and speaking languages", category: "person" },
-        { cn: "特别场合的食物", en: "Describe a food you eat on special occasions", category: "object" },
-        { cn: "喜欢的现场体育赛事", en: "Describe a live sports event you enjoyed watching", category: "event" },
-        { cn: "重要决定", en: "Describe an important decision you made", category: "event" },
-        { cn: "在团队中工作", en: "Describe a time when you worked in a team", category: "event" },
-        { cn: "近期改变的计划", en: "Describe a plan you changed recently", category: "event" },
-        { cn: "拥有成功商业的人", en: "Describe a person who owns a successful business", category: "person" },
-        { cn: "在成功公司工作的人", en: "Describe a person who works in a successful company", category: "person" },
-        { cn: "想从事医疗行业的人", en: "Describe a person you know who wants to work in the medical field", category: "person" },
-        { cn: "发小", en: "Describe a friend you have known since childhood", category: "person" },
-        { cn: "想颁布的新法律", en: "Describe a new law you would like to be introduced", category: "object" },
-        { cn: "喜欢在家/花园种植物的人", en: "Describe a person who enjoys growing plants at home or in the garden", category: "person" },
-        { cn: "早起经历", en: "Describe a time when you got up early", category: "event" },
-        { cn: "去过的无聊地方", en: "Describe a place you visited that was boring", category: "place" },
-        { cn: "有趣视频", en: "Describe an interesting video you saw recently", category: "object" },
-        { cn: "喜欢或不喜欢的高建筑", en: "Describe a tall building you like or dislike", category: "place" },
-        { cn: "收到特殊蛋糕", en: "Describe a special cake you received", category: "object" },
-        { cn: "想有空时去旅游的地方", en: "Describe a place you would like to travel to when you have free time", category: "place" }
+        // ===== 新题（37 道）=====
+        { cn: "喜欢或不喜欢的高建筑", en: "Describe a tall building you like or dislike", category: "place", isNew: true },
+        { cn: "有趣视频", en: "Describe an interesting video", category: "object", isNew: true },
+        { cn: "去过的无聊地方", en: "Describe a boring place", category: "place", isNew: true },
+        { cn: "早起经历", en: "Describe a time when you got up early", category: "event", isNew: true },
+        { cn: "喜欢在家/花园种菜的人", en: "Describe a person who loves to grow plants at home", category: "person", isNew: true },
+        { cn: "想颁布的新法律", en: "Describe a new law you would like to introduce in your country", category: "object", isNew: true },
+        { cn: "发小", en: "Describe a friend from your childhood", category: "person", isNew: true },
+        { cn: "想从事医疗行业的人", en: "Describe a person you know who would like to choose a career in the medical field", category: "person", isNew: true },
+        { cn: "拥有成功商业的人", en: "Describe a person you know who has a successful business", category: "person", isNew: true },
+        { cn: "近期改变的计划", en: "Describe a plan that you had to change recently", category: "event", isNew: true },
+        { cn: "在团队中工作", en: "Describe a time when you worked in a group", category: "event", isNew: true },
+        { cn: "重要决定", en: "Describe an important decision that you made", category: "event", isNew: true },
+        { cn: "喜欢的现场体育赛事", en: "Describe a live sports event you watched and liked", category: "event", isNew: true },
+        { cn: "特别场合的食物", en: "Describe a food that people eat on special occasions", category: "object", isNew: true },
+        { cn: "擅长学习和说语言的人", en: "Describe a person who is good at learning and speaking new languages", category: "person", isNew: true },
+        { cn: "遇到的科技问题", en: "Describe a challenging technological problem you faced", category: "object", isNew: true },
+        { cn: "名人出演的广告", en: "Describe an advertisement with a famous person in it", category: "object", isNew: true },
+        { cn: "推荐旅行过的地方", en: "Describe a place you have travelled to that you would like to recommend to others", category: "place", isNew: true },
+        { cn: "喜欢拜访但不想住的家", en: "Describe a home that you like to visit but do not want to live in", category: "place", isNew: true },
+        { cn: "包含动物的故事或书", en: "Describe a story or book with animals in it", category: "object", isNew: true },
+        { cn: "别人帮助解决问题", en: "Describe a time when a person did something to help you solve a problem", category: "event", isNew: true },
+        { cn: "保护环境的法律", en: "Describe a law on environmental protection", category: "object", isNew: true },
+        { cn: "很久没收到回复的信息", en: "Describe a time when you sent a message but received no reply for a long time", category: "object", isNew: true },
+        { cn: "长久目标/抱负", en: "Describe a long-term goal or ambition you would like to achieve", category: "event", isNew: true },
+        { cn: "遇到困难终成功的人", en: "Describe a person who met difficulties but succeeded", category: "person", isNew: true },
+        { cn: "改变重要想法", en: "Describe a time when you changed an important opinion of yours", category: "event", isNew: true },
+        { cn: "想要颁布的环保法律", en: "Describe an environmental law you would like your country to introduce", category: "object", isNew: true },
+        { cn: "当地新闻", en: "Describe a piece of local news that people are interested in", category: "object", isNew: true },
+        { cn: "近期改变", en: "Describe a change that you made recently", category: "event", isNew: true },
+        { cn: "想有空时去旅游的地方", en: "Describe a place you would like to visit in your free time", category: "place", isNew: true },
+        { cn: "收到特殊蛋糕", en: "Describe a special cake you received from others", category: "object", isNew: true },
+        { cn: "在成功公司工作的人", en: "Describe a person who works in a successful company", category: "person", isNew: true },
+        { cn: "语言学习", en: "Describe a thing you did to learn another language", category: "object", isNew: true },
+        { cn: "重要河流/湖泊", en: "Describe an important river or lake in your country", category: "place", isNew: true },
+        { cn: "花费甚少的外出日", en: "Describe a special day out that cost you little money", category: "event", isNew: true },
+        { cn: "组织快乐活动", en: "Describe a time when you organized a happy event successfully", category: "event", isNew: true },
+        { cn: "交通拥堵", en: "Describe a time when you were stuck in a traffic jam for a very long time", category: "event", isNew: true },
+        // ===== 保留题（27 道）=====
+        { cn: "完美工作", en: "Describe a perfect job you would like to have in the future", category: "event" },
+        { cn: "想见的名人", en: "Describe a famous person you would like to meet", category: "person" },
+        { cn: "禁用手机的场合", en: "Describe an occasion when you were not allowed to use your mobile phone", category: "event" },
+        { cn: "给别人建议", en: "Describe a time when you gave advice to others", category: "event" },
+        { cn: "想拥有的科技产品", en: "Describe a piece of technology (not a phone) that you would like to own", category: "object" },
+        { cn: "擅长做计划的人", en: "Describe a person who makes plans a lot and is good at planning", category: "person" },
+        { cn: "喜欢画画的孩子", en: "Describe a child who loves drawing or painting", category: "person" },
+        { cn: "App/程序", en: "Describe a program or app on your computer or phone", category: "object" },
+        { cn: "微笑的场合", en: "Describe an occasion when many people were smiling", category: "event" },
+        { cn: "为家人骄傲", en: "Describe a time when you felt proud of a family member", category: "event" },
+        { cn: "对家庭重要的东西", en: "Describe something important that has been kept in your family for a long time", category: "object" },
+        { cn: "自行车/摩托车/汽车旅行", en: "Describe a bicycle, motorcycle or car trip you would like to go", category: "event" },
+        { cn: "机智解决问题的人", en: "Describe a person who solved a problem in a smart way", category: "person" },
+        { cn: "朋友自学", en: "Describe one of your friends who learned something without a teacher", category: "person" },
+        { cn: "不享受的音乐活动", en: "Describe an event you attended in which you didn't enjoy the music played", category: "event" },
+        { cn: "近期看过且享受的电影", en: "Describe a movie you watched and enjoyed recently", category: "object" },
+        { cn: "有趣的建筑", en: "Describe an interesting building", category: "place" },
+        { cn: "发挥想象力", en: "Describe a time you needed to use your imagination", category: "event" },
+        { cn: "乐于助人的人", en: "Describe a person who often helps others", category: "person" },
+        { cn: "花费超过预期的物品", en: "Describe an item on which you spent more than expected", category: "object" },
+        { cn: "鼓励别人做不愿做的事", en: "Describe a time when you encouraged someone to do something they were unwilling to do", category: "event" },
+        { cn: "想从事的短期海外工作", en: "Describe a short-term job you want to have in a foreign country", category: "event" },
+        { cn: "爱护自然之人", en: "Describe a person who likes to look after the natural world", category: "person" },
+        { cn: "商店", en: "Describe a shop or store you enjoy visiting", category: "place" },
+        { cn: "去过且喜欢的城市", en: "Describe a city you enjoyed visiting", category: "place" },
+        { cn: "安静的地方", en: "Describe a quiet place you like to go", category: "place" },
+        { cn: "喜欢的电视/网络节目", en: "Describe a TV or online program you like to watch", category: "object" }
     ];
 
     // ========================================
@@ -992,7 +1023,7 @@
         document.getElementById('homeDecompose').classList.add('hidden');
         document.getElementById('homeLoading').classList.remove('hidden');
         document.getElementById('homeLoading').querySelector('p').innerHTML = 'AI 正在推荐串题题目<span class="loading-dots"></span>';
-        document.getElementById('homeLoading').querySelector('.text-xs').textContent = '从 37 道题库中匹配最适合的...';
+        document.getElementById('homeLoading').querySelector('.text-xs').textContent = '从 64 道题库中匹配最适合的...';
         setProgress(2, '正在推荐题目...');
 
         try {
@@ -1028,12 +1059,16 @@
         document.getElementById('recManualSection').classList.remove('hidden');
 
         const list = document.getElementById('recTopicList');
-        list.innerHTML = recommendations.map((r, i) => `
+        list.innerHTML = recommendations.map((r, i) => {
+            const topicMatch = TOPICS.find(t => t.cn === r.topic_cn);
+            const isNew = topicMatch?.isNew;
+            return `
             <div class="recommend-card card rounded-xl p-3 cursor-pointer" id="recCard_${i}" onclick="onTopicClick(${i})">
                 <div class="flex items-start gap-2">
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-1.5 mb-1 flex-wrap">
                             <span class="text-xs font-semibold text-gray-800">${r.topic_cn}</span>
+                            ${isNew ? '<span class="category-badge badge-new">新</span>' : ''}
                             <span class="category-badge ${r.confidence === 'high' ? 'badge-high' : 'badge-medium'}">${r.confidence === 'high' ? '高' : '中'}</span>
                         </div>
                         <p class="text-[10px] text-blue-600 leading-relaxed">💡 ${r.angle}</p>
@@ -1041,7 +1076,8 @@
                     <button class="btn-main px-2.5 py-1 rounded-lg text-[11px] font-medium text-white flex-shrink-0 btn-action" onclick="event.stopPropagation(); onTopicClick(${i})">✍️</button>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
 
         // 显示保存按钮
         document.getElementById('saveStoryBtn').classList.remove('hidden');
@@ -1225,7 +1261,8 @@
         const grid = document.getElementById('topicGrid');
         if (!grid) return;
         grid.innerHTML = TOPICS.map((t, i) => `
-            <div class="topic-tag rounded-lg p-2 border border-gray-200 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all" onclick="generateForTopic(${i})" title="${t.en}">
+            <div class="topic-tag rounded-lg p-2 border border-gray-200 text-center cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all relative" onclick="generateForTopic(${i})" title="${t.en}">
+                ${t.isNew ? '<span class="absolute -top-1.5 -right-1.5 text-[9px] font-bold text-white bg-red-500 rounded-full w-4 h-4 flex items-center justify-center leading-none">新</span>' : ''}
                 <p class="text-xs font-medium text-gray-700">${t.cn}</p>
                 <p class="text-[10px] text-gray-400 mt-0.5 leading-tight truncate">${t.en.split(' ').slice(0, 4).join(' ')}...</p>
             </div>
