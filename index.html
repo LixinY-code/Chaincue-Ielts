@@ -218,6 +218,17 @@
 
                 <!-- 用户区 -->
                 <div class="flex items-center gap-3 flex-shrink-0">
+                    <!-- 积分显示 -->
+                    <div id="creditsDisplay" class="hidden items-center gap-1.5 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-full">
+                        <span class="text-sm">⚡</span>
+                        <span class="text-xs font-semibold text-blue-700"><span id="creditsValue">-</span> 积分</span>
+                    </div>
+
+                    <!-- 充值按钮 -->
+                    <button id="rechargeBtn" onclick="openRechargeModal()" class="hidden btn-secondary px-3 py-1.5 rounded-full text-xs font-medium btn-action">
+                        💎 充值
+                    </button>
+
                     <!-- 公告按钮 -->
                     <button id="announcementBtn" onclick="showAnnouncement()" class="relative p-2 rounded-xl hover:bg-blue-50 transition-colors hidden" title="更新公告">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
@@ -517,6 +528,76 @@
         </div>
     </div>
 
+    <!-- ===== 充值弹窗 ===== -->
+    <div id="rechargeModal" class="modal-overlay" onclick="if(event.target===this)closeRechargeModal()">
+        <div class="modal-box" style="width: 460px;">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-base font-semibold text-gray-800">💎 充值积分</h3>
+                <button onclick="closeRechargeModal()" class="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+            </div>
+
+            <!-- 区域一：闲鱼购买 -->
+            <div class="mb-5">
+                <h4 class="text-xs font-semibold text-gray-500 mb-3">🛒 前往闲鱼购买</h4>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div class="card rounded-xl p-3 text-center">
+                        <p class="text-xs font-bold text-gray-700">体验套餐</p>
+                        <p class="text-lg font-bold text-blue-600 mt-1">7 <span class="text-xs font-normal text-gray-400">积分</span></p>
+                        <p class="text-xs text-gray-400 mt-0.5">¥9.9</p>
+                        <a href="https://www.goofish.com/item?id=XXXXX" target="_blank" rel="noopener" class="btn-secondary block mt-2 py-1.5 rounded-lg text-xs font-medium btn-action">去闲鱼购买</a>
+                    </div>
+                    <div class="card rounded-xl p-3 text-center">
+                        <p class="text-xs font-bold text-gray-700">基础套餐</p>
+                        <p class="text-lg font-bold text-blue-600 mt-1">25 <span class="text-xs font-normal text-gray-400">积分</span></p>
+                        <p class="text-xs text-gray-400 mt-0.5">¥29.9</p>
+                        <a href="https://www.goofish.com/item?id=XXXXX" target="_blank" rel="noopener" class="btn-secondary block mt-2 py-1.5 rounded-lg text-xs font-medium btn-action">去闲鱼购买</a>
+                    </div>
+                    <div class="card rounded-xl p-3 text-center relative">
+                        <span class="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-bold text-white bg-blue-500 px-2 py-0.5 rounded-full">推荐</span>
+                        <p class="text-xs font-bold text-gray-700">超值套餐</p>
+                        <p class="text-lg font-bold text-blue-600 mt-1">60 <span class="text-xs font-normal text-gray-400">积分</span></p>
+                        <p class="text-xs text-gray-400 mt-0.5">¥59.9</p>
+                        <a href="https://www.goofish.com/item?id=XXXXX" target="_blank" rel="noopener" class="btn-main block mt-2 py-1.5 rounded-lg text-xs font-medium text-white btn-action">去闲鱼购买</a>
+                    </div>
+                    <div class="card rounded-xl p-3 text-center">
+                        <p class="text-xs font-bold text-gray-700">旗舰套餐</p>
+                        <p class="text-lg font-bold text-blue-600 mt-1">100 <span class="text-xs font-normal text-gray-400">积分</span></p>
+                        <p class="text-xs text-gray-400 mt-0.5">¥89.9</p>
+                        <a href="https://www.goofish.com/item?id=XXXXX" target="_blank" rel="noopener" class="btn-secondary block mt-2 py-1.5 rounded-lg text-xs font-medium btn-action">去闲鱼购买</a>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 mt-2.5 text-center">💡 付款后请私信卖家获取激活码，再回到此处输入兑换</p>
+            </div>
+
+            <!-- 分割线 -->
+            <div class="border-t border-gray-100 pt-4">
+                <!-- 区域二：输入兑换码 -->
+                <h4 class="text-xs font-semibold text-gray-500 mb-3">🎫 输入激活码兑换</h4>
+                <div class="flex gap-2">
+                    <input id="redeemCodeInput" type="text" placeholder="请输入激活码，如 CHAIN-7A3K-9M2P"
+                        class="input-field flex-1 px-4 py-2.5 rounded-xl text-sm" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()">
+                    <button id="redeemBtn" onclick="handleRedeem()" class="btn-main px-5 py-2.5 rounded-xl text-sm font-semibold text-white btn-action">立即兑换</button>
+                </div>
+                <div id="redeemResult" class="hidden mt-3 p-2.5 rounded-lg text-xs text-center"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 积分不足提示弹窗 ===== -->
+    <div id="noCreditsModal" class="modal-overlay" onclick="if(event.target===this)closeNoCreditsModal()">
+        <div class="modal-box" style="width: 380px;">
+            <div class="text-center">
+                <div class="text-4xl mb-3">😟</div>
+                <h3 class="text-base font-semibold text-gray-800 mb-2">积分已用完</h3>
+                <p class="text-xs text-gray-500 mb-5">你的免费试用次数已用完，请前往闲鱼充值后兑换激活码</p>
+                <div class="flex gap-2">
+                    <button onclick="closeNoCreditsModal()" class="flex-1 btn-secondary py-2.5 rounded-xl text-sm font-medium btn-action">取消</button>
+                    <button onclick="closeNoCreditsModal(); openRechargeModal();" class="flex-1 btn-main py-2.5 rounded-xl text-sm font-semibold text-white btn-action">去充值</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     // ========================================
     // 常量
@@ -729,14 +810,26 @@
         const authBtn = document.getElementById('authBtn');
         if (!authBtn) return;
 
+        const creditsDisplay = document.getElementById('creditsDisplay');
+        const rechargeBtn = document.getElementById('rechargeBtn');
+
         if (currentUser) {
             const email = currentUser.email || '用户';
             authBtn.innerHTML = `<span class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xs flex items-center justify-center font-semibold">${email.charAt(0).toUpperCase()}</span>`;
             authBtn.onclick = (e) => { e.stopPropagation(); document.getElementById('userMenu').classList.toggle('show'); };
+            // 显示积分和充值按钮
+            if (creditsDisplay) creditsDisplay.classList.remove('hidden');
+            if (creditsDisplay) creditsDisplay.classList.add('flex');
+            if (rechargeBtn) rechargeBtn.classList.remove('hidden');
+            // 加载积分
+            fetchCredits();
         } else {
             if (sbClient) { authBtn.innerHTML = '登录 / 注册'; authBtn.onclick = () => openAuthModal(); authBtn.style.display = ''; }
             else { authBtn.style.display = 'none'; }
             document.getElementById('userMenu').classList.remove('show');
+            // 隐藏积分和充值按钮
+            if (creditsDisplay) { creditsDisplay.classList.add('hidden'); creditsDisplay.classList.remove('flex'); }
+            if (rechargeBtn) rechargeBtn.classList.add('hidden');
         }
         checkDecomposeBtn();
     }
@@ -780,7 +873,13 @@
                 : await sbClient.auth.signUp({ email, password });
             if (error) throw error;
             closeAuthModal();
-            showToast(authMode === 'login' ? '登录成功 ✓' : '注册成功 ✓', 'success');
+            if (authMode === 'login') {
+                showToast('登录成功 ✓', 'success');
+            } else {
+                // 新用户注册欢迎提示
+                showToast('🎉 欢迎！你已获得 5 次免费试用机会', 'success');
+                setTimeout(() => showToast('用完可点击右上角「充值」购买激活码', 'info'), 2800);
+            }
         } catch (err) {
             errEl.textContent = err.message || '操作失败';
             errEl.classList.remove('hidden');
@@ -797,6 +896,115 @@
         currentStoryId = null;
         updateAuthUI();
         showToast('已退出登录', 'info');
+    }
+
+    // ========================================
+    // 积分系统
+    // ========================================
+
+    // 获取当前积分
+    async function fetchCredits() {
+        if (!currentUser) return;
+        try {
+            const token = (await sbClient.auth.getSession()).data.session?.access_token;
+            if (!token) return;
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=credits&id=eq.${currentUser.id}`, {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            const credits = (data[0] && data[0].credits != null) ? data[0].credits : 5;
+            updateCreditsDisplay(credits);
+            return credits;
+        } catch (err) { console.error('Fetch credits error:', err); }
+    }
+
+    // 更新积分显示
+    function updateCreditsDisplay(credits) {
+        const el = document.getElementById('creditsValue');
+        if (el) el.textContent = credits;
+    }
+
+    // 充值弹窗
+    function openRechargeModal() {
+        document.getElementById('rechargeModal').classList.add('show');
+        document.getElementById('redeemCodeInput').value = '';
+        document.getElementById('redeemResult').classList.add('hidden');
+        document.getElementById('redeemCodeInput').focus();
+    }
+
+    function closeRechargeModal() {
+        document.getElementById('rechargeModal').classList.remove('show');
+    }
+
+    // 兑换激活码
+    async function handleRedeem() {
+        const code = document.getElementById('redeemCodeInput').value.trim().toUpperCase();
+        const resultEl = document.getElementById('redeemResult');
+        const btn = document.getElementById('redeemBtn');
+
+        if (!code) {
+            resultEl.className = 'mt-3 p-2.5 rounded-lg text-xs text-center bg-red-50 text-red-600';
+            resultEl.textContent = '请输入激活码';
+            resultEl.classList.remove('hidden');
+            return;
+        }
+
+        if (!currentUser) {
+            resultEl.className = 'mt-3 p-2.5 rounded-lg text-xs text-center bg-red-50 text-red-600';
+            resultEl.textContent = '请先登录';
+            resultEl.classList.remove('hidden');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = '兑换中...';
+        resultEl.classList.add('hidden');
+
+        try {
+            const token = (await sbClient.auth.getSession()).data.session?.access_token;
+            const res = await fetch('/api/redeem-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ code })
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                resultEl.className = 'mt-3 p-2.5 rounded-lg text-xs text-center bg-green-50 text-green-700';
+                resultEl.innerHTML = `✅ 兑换成功！获得 <strong>${data.credits_added}</strong> 积分，当前余额 <strong>${data.new_balance}</strong> 积分`;
+                resultEl.classList.remove('hidden');
+                updateCreditsDisplay(data.new_balance);
+                showToast(`充值成功 +${data.credits_added} 积分`, 'success');
+                // 1.5秒后关闭弹窗
+                setTimeout(() => closeRechargeModal(), 1500);
+            } else {
+                resultEl.className = 'mt-3 p-2.5 rounded-lg text-xs text-center bg-red-50 text-red-600';
+                resultEl.textContent = data.error || '兑换失败';
+                resultEl.classList.remove('hidden');
+            }
+        } catch (err) {
+            resultEl.className = 'mt-3 p-2.5 rounded-lg text-xs text-center bg-red-50 text-red-600';
+            resultEl.textContent = '网络错误，请稍后重试';
+            resultEl.classList.remove('hidden');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '立即兑换';
+        }
+    }
+
+    // 积分不足弹窗
+    function showNoCreditsModal() {
+        document.getElementById('noCreditsModal').classList.add('show');
+    }
+
+    function closeNoCreditsModal() {
+        document.getElementById('noCreditsModal').classList.remove('show');
+    }
+
+    // 检查 402 积分不足
+    function handle402Error() {
+        showNoCreditsModal();
     }
 
     // ========================================
@@ -1130,6 +1338,12 @@
             });
 
             const data = await res.json();
+            if (res.status === 402) {
+                handle402Error();
+                document.getElementById('recLoading').classList.add('hidden');
+                document.getElementById('recPlaceholder').classList.remove('hidden');
+                return;
+            }
             if (!res.ok || !data.success) {
                 showToast(data.error || '生成失败', 'error');
                 document.getElementById('recLoading').classList.add('hidden');
@@ -1139,6 +1353,8 @@
 
             state.currentAnswer = data.answer;
             showAnswerInRightPanel(data.answer, `${rec.topic_cn} — ${rec.topic_en}`);
+            // 刷新积分显示
+            if (data.credits_remaining != null) updateCreditsDisplay(data.credits_remaining);
         } catch (err) {
             showToast('网络错误', 'error');
             document.getElementById('recLoading').classList.add('hidden');
@@ -1306,6 +1522,12 @@
             });
 
             const data = await res.json();
+            if (res.status === 402) {
+                handle402Error();
+                document.getElementById('recLoading').classList.add('hidden');
+                document.getElementById('recPlaceholder').classList.remove('hidden');
+                return;
+            }
             if (!res.ok || !data.success) {
                 showToast(data.error || '生成失败', 'error');
                 document.getElementById('recLoading').classList.add('hidden');
@@ -1316,6 +1538,8 @@
             state.currentAnswer = data.answer;
             state.selectedTopic = { topic_cn: topic.cn, topic_en: topic.en };
             showAnswerInRightPanel(data.answer, `${topic.cn} — ${topic.en}`);
+            // 刷新积分显示
+            if (data.credits_remaining != null) updateCreditsDisplay(data.credits_remaining);
         } catch (err) {
             showToast('网络错误', 'error');
             document.getElementById('recLoading').classList.add('hidden');

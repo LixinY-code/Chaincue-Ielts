@@ -164,6 +164,31 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: '请提供故事拆解数据和目标类别' });
     }
 
+    // ===== 积分校验 =====
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('credits')
+      .eq('id', user.id)
+      .single();
+
+    // 如果 profile 不存在，自动创建（防御性，给 5 积分）
+    let currentCredits = 5;
+    if (profileError || !profile) {
+      const { data: newProfile } = await supabase
+        .from('profiles')
+        .insert({ id: user.id, credits: 5 })
+        .select('credits')
+        .single();
+      if (newProfile) currentCredits = newProfile.credits;
+    } else {
+      currentCredits = profile.credits || 0;
+    }
+
+    // 积分不足，返回 402
+    if (currentCredits < 1) {
+      return res.status(402).json({ error: '积分不足，请充值' });
+    }
+
     const prompt = buildAnswerPrompt(decomposition, category, angle, topic_en);
     const aiRaw = await callAI(prompt);
     const answer = parseJSON(aiRaw);
@@ -202,7 +227,19 @@ export default async function handler(req, res) {
     });
     if (dbError) console.error('DB log error:', dbError);
 
-    return res.status(200).json({ success: true, answer: result });
+    // ===== 扣减 1 积分 =====
+    const { error: deductError } = await supabase
+      .from('profiles')
+      .update({ credits: currentCredits - 1, updated_at: new Date().toISOString() })
+      .eq('id', user.id);
+
+    if (deductError) console.error('Deduct credits error:', deductError);
+
+    return res.status(200).json({
+      success: true,
+      answer: result,
+      credits_remaining: currentCredits - 1
+    });
 
   } catch (err) {
     console.error('Generate answer error:', err);
