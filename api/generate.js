@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { callChatCompletion } from './lib/ai-request.js';
+import { callChatCompletion } from '../lib/ai-request.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,

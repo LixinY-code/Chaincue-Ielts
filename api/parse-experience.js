@@ -1,5 +1,5 @@
 import { verifyUser } from './lib/supabase.js';
-import { callChatCompletion } from './lib/ai-request.js';
+import { callChatCompletion } from '../lib/ai-request.js';
 
 // =============================================
 // 经历要素解析 Prompt
