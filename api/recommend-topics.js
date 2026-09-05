@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { callChatCompletion } from './lib/ai-request.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -122,47 +123,16 @@ Return valid JSON only. No explanations. No markdown fences.`;
 // AI 调用
 // =============================================
 async function callAI(prompt, { temperature = 0.2, max_tokens = 2000 } = {}) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000);
-
-  try {
-    const res = await fetch('https://sg.uiuiapi.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.UIUI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: 'You are an IELTS Speaking Part 2 expert. Return only the requested JSON output — no explanations, no preamble.' },
-          { role: 'user', content: prompt }
-        ],
-        temperature,
-        max_tokens
-      }),
-      signal: controller.signal
-    });
-
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      let errMsg = '';
-      try { errMsg = await res.text(); } catch {}
-      if (res.status === 401) throw new Error('AI API Key 无效');
-      if (res.status === 429) throw new Error('AI 请求太频繁，请稍后再试');
-      throw new Error(`AI API 返回 ${res.status}: ${errMsg.substring(0, 100)}`);
-    }
-
-    const data = await res.json();
-    const content = data.choices?.[0]?.message?.content?.trim();
-    if (!content) throw new Error('AI 返回内容为空');
-    return content;
-  } catch (err) {
-    clearTimeout(timeout);
-    if (err.name === 'AbortError') throw new Error('AI 请求超时（60s）');
-    throw err;
-  }
+  return callChatCompletion({
+    messages: [
+      { role: 'system', content: 'You are an IELTS Speaking Part 2 expert. Return only the requested JSON output — no explanations, no preamble.' },
+      { role: 'user', content: prompt }
+    ],
+    temperature,
+    max_tokens,
+    timeoutMs: 60000,
+    timeoutMessage: 'AI 请求超时（60s）'
+  });
 }
 
 function parseJSON(raw) {

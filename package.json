@@ -1,5 +1,9 @@
 {
   "name": "ti-lian-kou",
   "version": "1.0.0",
-  "private": true
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.115.0"
+  }
 }

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { callChatCompletion } from './lib/ai-request.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -181,47 +182,16 @@ Write only the script in English. No JSON. No explanations.`;
 // AI 调用封装
 // =============================================
 async function callAI(prompt, { temperature = 0.75, max_tokens = 4000 } = {}) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 120000);
-
-  try {
-    const res = await fetch('https://sg.uiuiapi.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.UIUI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: 'You are an IELTS speaking expert who specializes in "story weaving" — structuring personal experiences across Past, Present, and Future for Part 2. Return only the requested output — no explanations, no apologies, no preamble. Write in natural, conversational English.' },
-          { role: 'user', content: prompt }
-        ],
-        temperature,
-        max_tokens
-      }),
-      signal: controller.signal
-    });
-
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      let errMsg = '';
-      try { errMsg = await res.text(); } catch {}
-      if (res.status === 401) throw new Error('AI API Key 无效');
-      if (res.status === 429) throw new Error('AI 请求太频繁，请稍后再试');
-      throw new Error(`AI API 返回 ${res.status}: ${errMsg.substring(0, 100)}`);
-    }
-
-    const data = await res.json();
-    const content = data.choices?.[0]?.message?.content?.trim();
-    if (!content) throw new Error('AI 返回内容为空');
-    return content;
-  } catch (err) {
-    clearTimeout(timeout);
-    if (err.name === 'AbortError') throw new Error('AI 请求超时（120s）');
-    throw err;
-  }
+  return callChatCompletion({
+    messages: [
+      { role: 'system', content: 'You are an IELTS speaking expert who specializes in "story weaving" — structuring personal experiences across Past, Present, and Future for Part 2. Return only the requested output — no explanations, no apologies, no preamble. Write in natural, conversational English.' },
+      { role: 'user', content: prompt }
+    ],
+    temperature,
+    max_tokens,
+    timeoutMs: 120000,
+    timeoutMessage: 'AI 请求超时（120s）'
+  });
 }
 
 // 从 AI 返回中提取 JSON

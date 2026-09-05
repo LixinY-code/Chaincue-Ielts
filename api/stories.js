@@ -1,4 +1,4 @@
-import { verifyUser, sbQuery, sbInsert, sbUpdate, sbDelete } from './lib/supabase';
+import { verifyUser, sbQuery, sbInsert, sbUpdate, sbDelete } from './lib/supabase.js';
 
 // =============================================
 // GET: 列出用户的故事库
